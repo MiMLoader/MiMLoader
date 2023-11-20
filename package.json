@@ -1,5 +1,6 @@
 {
   "name": "mimodloader",
+  "version": "0.3.1",
   "module": "index.ts",
   "devDependencies": {
     "@types/extract-zip": "^2.0.1",
@@ -10,7 +11,8 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "bun run index.ts"
+    "start": "bun run index.ts",
+    "build": "bun build index.ts --compile --minify --outfile 'dist/Moonstone Island Mod Loader - 0.3.1'"
   },
   "type": "module",
   "dependencies": {
