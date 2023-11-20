@@ -1,0 +1,21 @@
+{
+  "name": "mimodloader",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/extract-zip": "^2.0.1",
+    "@types/archiver": "^6.0.1",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "archiver": "^6.0.1",
+    "extract-zip": "^2.0.1",
+    "merge-anything": "^5.1.7"
+  }
+}
