@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
-    "module": "esnext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
     "target": "esnext",
     "moduleResolution": "bundler",
     "moduleDetection": "force",
@@ -16,7 +16,8 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "types": [
-      "bun-types" // add Bun global
+      "bun-types",
+      "web"
     ]
   }
 }

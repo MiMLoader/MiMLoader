@@ -10,7 +10,7 @@
             "request": "launch",
             "name": "Debug File",
             "program": "${file}",
-            "cwd": "/home/saturn/Ext/SteamLibrary/steamapps/common/Moonstone Island Mod Loader",
+            "cwd": "/home/saturn/Ext/SteamLibrary/steamapps/common/",
             "stopOnEntry": false,
             "watchMode": false
         },
