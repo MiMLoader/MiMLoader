@@ -11,15 +11,15 @@ console.log(`Module import ${Bun.nanoseconds()/1000000}ms`);
 const gamePath = process.cwd();
 
 // #region Dev tools
-// const devTools = {
-//     regen: () => {
-//         console.log('regenerating from source');
-//         fs.cpSync(path.join(gamePath, '../Moonstone Island/'), gamePath, {recursive: true, force: true});
-//     }
-// }
-// const forDebug = {
-//     devTools
-// }
+const devTools = {
+    regen: () => {
+        console.log('regenerating from source');
+        fs.cpSync(path.join(gamePath, '../Moonstone Island/'), gamePath, {recursive: true, force: true});
+    }
+}
+const forDebug = {
+    devTools
+}
 // #endregion
 
 if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
