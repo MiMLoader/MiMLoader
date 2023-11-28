@@ -1,13 +1,13 @@
-console.log(`Runtime startup ${Bun.nanoseconds()/1000000}ms`);
-
 import console from "./assets/console";
 import path from "path";
 import fs from "fs";
 import nodeNotifier from "node-notifier";
 import * as packagenw from "./assets/packageHandler";
 import * as htmlPatches from "./patches/htmlPatches";
+import { spawn } from "child_process";
 
-console.log(`Module import ${Bun.nanoseconds()/1000000}ms`);
+console.log('Starting MIML');
+
 const gamePath = process.cwd();
 
 // #region Dev tools
@@ -34,8 +34,7 @@ if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
 // startup cleanup
 if(fs.existsSync(path.join(gamePath, 'tmp-package'))) { fs.rmSync(path.join(gamePath, 'tmp-package'), {recursive: true, force: true})};
 
-// First time setup
-if (fs.readdirSync(gamePath).length <=1) {
+const firstTimeSetup = async () => {
     console.log('Performing first time setup');
     // copy game files
     try {
@@ -53,7 +52,9 @@ if (fs.readdirSync(gamePath).length <=1) {
     await packagenw.decompress();
     
     // enable chrome devtools
-    Bun.file(path.join(gamePath, 'tmp-package', 'package.json')).json().then((json) => {
+    fs.readFile(path.join(gamePath, 'tmp-package', 'package.json'), (err, data) => {
+        if (err) throw err;
+        const json = JSON.parse(data.toString());
         let chromiumArgs: string[] = json['chromium-args'].split(' ');
         for (let i = 0; i < chromiumArgs.length; i++) {
             if(chromiumArgs[i].includes('--disable-devtools')) {
@@ -62,20 +63,25 @@ if (fs.readdirSync(gamePath).length <=1) {
             }
         }
         json['chromium-args'] = chromiumArgs.join(' ');
-        Bun.write(path.join(gamePath, 'tmp-package', 'package.json'), JSON.stringify(json, null, 4));
+        fs.writeFile(path.join(gamePath, 'tmp-package', 'package.json'), JSON.stringify(json, null, 4), (err) => {
+            if (err) throw err;
+        });
     });
 
     // html patches
-    Bun.file(path.join(gamePath, 'tmp-package', 'index.html')).text().then((html) => {
+    fs.readFile(path.join(gamePath, 'tmp-package', 'index.html'), (err, data) => {
+        if (err) throw err;
+        let html = data.toString();
         html = html.replace('<title>Moonstone Island</title>', '<title>Moonstone Island | Modded Alpha</title>');
         html = html.replace('</body>', `
         <script>
             ${htmlPatches.hiddenMenu}
         </script>
         </body>`);
-        Bun.write(path.join(gamePath, 'tmp-package', 'index.html'), html);
+        fs.writeFile(path.join(gamePath, 'tmp-package', 'index.html'), html, (err) => {
+            if (err) throw err;
+        });
     });
-    
     fs.rmSync(path.join(gamePath, 'package.nw'), {force: true});
     
     await packagenw.compress();
@@ -83,11 +89,15 @@ if (fs.readdirSync(gamePath).length <=1) {
     // #endregion
 }
 
-console.log(`Launch ${Bun.nanoseconds()/1000000}ms`);
+// First time setup
+if (fs.readdirSync(gamePath).length <=1) {
+    firstTimeSetup().then(() => {
+        console.log('First time setup complete');
+    });
+} else {
+    console.log('Skipping first time setup (game files already exist)');
+}
 
-Bun.spawn({
-    cmd: [path.join(gamePath, 'Moonstone Island')],
-    cwd: gamePath,
-    stdout: 'pipe',
-    stderr: 'pipe',
-});
+console.log('Starting game');
+spawn(path.join(gamePath, 'Moonstone Island'), [], {});
+console.log('Game started :3');
