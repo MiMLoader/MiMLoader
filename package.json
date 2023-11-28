@@ -11,8 +11,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "bun build src/index.ts --compile --minify --outfile 'dist/Moonstone Island Mod Loader'",
-    "start": "bun run build && cp 'dist/Moonstone Island Mod Loader' '/home/saturn/Ext/SteamLibrary/steamapps/common/Moonstone Island Mod Loader' && cd '/home/saturn/Ext/SteamLibrary/steamapps/common/Moonstone Island Mod Loader' && ./'Moonstone Island Mod Loader'"
+    "build": "bun build src/index.ts --minify --target node --outfile 'build/Moonstone Island Mod Loader.js' && bunx pkg -t latest-linux,latest-win,latest-mac --compress GZip --out-path dist/ 'build/Moonstone Island Mod Loader.js'"
   },
   "type": "module",
   "dependencies": {
