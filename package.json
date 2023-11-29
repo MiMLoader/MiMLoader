@@ -10,19 +10,10 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
+    "@types/node-notifier": "^8.0.5",
     "@types/web": "^0.0.120",
     "bun-types": "latest"
   },
-  "bin": "build/index.js",
-  "pkg": {
-    "outputPath": "bin/mimodloader",
-    "targets": [
-      "latest-linux",
-      "latest-macos",
-      "latest-win"
-    ]
-  },
   "scripts": {
-    "build": "bun build src/index.ts --outdir ./build --target node"
   }
 }
