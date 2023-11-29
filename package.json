@@ -1,19 +1,27 @@
 {
   "name": "mimodloader",
-  "type": "module",
+  "type": "commonjs",
+  "private": true,
   "version": "1.0.0",
-  "module": "src/index.ts",
+  "module": "src/main.ts",
+  "main": "src/main.js",
   "dependencies": {
-    "chalk": "^5.3.0",
+    "chalk": "^4",
     "compressing": "^1.10.0",
     "node-notifier": "^10.0.1",
     "path": "^0.12.7"
   },
   "devDependencies": {
-    "@types/node-notifier": "^8.0.5",
+    "@electron-forge/cli": "^6.2.1",
+    "@electron-forge/maker-zip": "^6.2.1",
     "@types/web": "^0.0.120",
-    "bun-types": "latest"
+    "electron": "^27.1.2",
+    "electron-builder": "^24.6.3"
   },
   "scripts": {
+    "build-linux": "electron-forge make --platform=linux",
+    "build-win": "electron-forge make --platform=win32",
+    "build-mac": "electron-forge make --platform=darwin",
+    "build-all": "npm run build-linux && npm run build-win && npm run build-mac"
   }
 }
