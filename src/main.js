@@ -38,7 +38,7 @@ if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
 if(fs.existsSync(path.join(gamePath, 'tmp-package'))) { fs.rmSync(path.join(gamePath, 'tmp-package'), {recursive: true, force: true})};
 
 // First time setup
-if(!fs.existsSync(path.join(gamePath, 'wow.much.run.first.time.setup'))) {
+if(!fs.existsSync(path.join(gamePath, 'game/'))) {
     console.log('Performing first time setup');
     // copy game files
     try {
@@ -91,7 +91,6 @@ if(!fs.existsSync(path.join(gamePath, 'wow.much.run.first.time.setup'))) {
     await packagenw.compress();
     fs.rmSync(path.join(gamePath, 'tmp-package'), {recursive: true});
     console.log('First time setup complete');
-    fs.writeSync(fs.openSync(path.join(gamePath, 'wow.much.run.first.time.setup'), 'w'), '');
     // #endregion
 } else {
     console.log('Skipping first time setup (game files already exist)');
@@ -115,7 +114,6 @@ switch (process.platform) {
     default:
         console.log('OS not supported');
         process.exit(0);
-        break;
 }
 
 exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {

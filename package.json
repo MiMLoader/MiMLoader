@@ -1,6 +1,8 @@
 {
   "name": "mimodloader",
   "type": "commonjs",
+  "description": "Moonstone Island Mod Loader",
+  "author": "Ahhh_Saturn",
   "private": true,
   "version": "1.0.0",
   "module": "src/main.ts",
@@ -12,16 +14,25 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.2.1",
-    "@electron-forge/maker-zip": "^6.2.1",
     "@types/web": "^0.0.120",
     "electron": "^27.1.2",
-    "electron-builder": "^24.6.3"
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.astraeffect.miml",
+    "productName": "Moonstone Island Mod Loader",
+    "fileAssociations": {
+      "ext": "miml",
+      "name": "Moonstone Island Mod Loader",
+      "icon": "src/assets/icon.ico"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ]
   },
   "scripts": {
-    "build-linux": "electron-forge make --platform=linux",
-    "build-win": "electron-forge make --platform=win32",
-    "build-mac": "electron-forge make --platform=darwin",
-    "build-all": "npm run build-linux && npm run build-win && npm run build-mac"
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder -wl"
   }
 }
