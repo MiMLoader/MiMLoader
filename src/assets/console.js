@@ -1,18 +1,18 @@
-import chalk from 'chalk';
+const chalk = require('chalk');
 
 const ogConsole = console;
 
-export default console = {
+exports.console =  console = {
     ...console,
-    log: (...args: any[]) => {
+    log: (...args) => {
         args.unshift(chalk.cyan.bold('[MIML]'));
         ogConsole.log(...args);
     },
-    error: (...args: any[]) => {
+    error: (...args) => {
         args.unshift(chalk.red.bold.underline('[MIML]'));
         ogConsole.error(...args);
     },
-    warn: (...args: any[]) => {
+    warn: (...args) => {
         args.unshift(chalk.yellow.bold.underline('[MIML]'));
         ogConsole.warn(...args);
     },

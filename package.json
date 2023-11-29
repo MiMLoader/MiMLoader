@@ -1,24 +1,38 @@
 {
   "name": "mimodloader",
+  "type": "commonjs",
+  "description": "Moonstone Island Mod Loader",
+  "author": "Ahhh_Saturn",
+  "private": true,
   "version": "1.0.0",
-  "module": "src/index.ts",
-  "devDependencies": {
-    "@types/node-notifier": "^8.0.5",
-    "@types/web": "^0.0.120",
-    "bun-types": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "scripts": {
-    "build": "bun build src/index.ts --compile --minify --outfile 'dist/Moonstone Island Mod Loader'",
-    "start": "bun run build && cp 'dist/Moonstone Island Mod Loader' '/home/saturn/Ext/SteamLibrary/steamapps/common/Moonstone Island Mod Loader' && cd '/home/saturn/Ext/SteamLibrary/steamapps/common/Moonstone Island Mod Loader' && ./'Moonstone Island Mod Loader'"
-  },
-  "type": "module",
+  "module": "src/main.ts",
+  "main": "src/main.js",
   "dependencies": {
-    "chalk": "^5.3.0",
+    "chalk": "^4",
     "compressing": "^1.10.0",
     "node-notifier": "^10.0.1",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@types/web": "^0.0.120",
+    "electron": "^27.1.2",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.astraeffect.miml",
+    "productName": "Moonstone Island Mod Loader",
+    "fileAssociations": {
+      "ext": "miml",
+      "name": "Moonstone Island Mod Loader",
+      "icon": "src/assets/icon.ico"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ]
+  },
+  "scripts": {
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder -wl"
   }
 }
