@@ -1,29 +1,21 @@
 const path = require('path');
 const fs = require('fs');
 const nodeNotifier = require('node-notifier');
-const spawn = require('child_process').spawn;
 const {console}= require('./assets/console.js');
 const {packagenw} = require('./assets/packageHandler.js');
+const {modLoaderServer} = require('./assets/modLoaderServer.js');
 const htmlPatches = require('./patches/htmlPatches.js');
+const compressing = require('compressing');
 const { exec } = require('child_process');
+console.clear();
 
 console.log('Starting MIML');
 
 (async () => {
-
 const gamePath = process.cwd();
-
-// #region Dev tools
-const devTools = {
-    regen: () => {
-        console.log('regenerating from source');
-        fs.cpSync(path.join(gamePath, '../Moonstone Island/'), path.join(gamePath, 'game/'), {recursive: true, force: true});
-    }
-}
-const forDebug = {
-    devTools
-}
-// #endregion
+const miml = {
+    mods: []
+};
 
 if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
     nodeNotifier.notify({
@@ -40,6 +32,12 @@ if(fs.existsSync(path.join(gamePath, 'tmp-package'))) { fs.rmSync(path.join(game
 // First time setup
 if(!fs.existsSync(path.join(gamePath, 'game/'))) {
     console.log('Performing first time setup');
+
+    // create mods folder
+    try {
+        fs.mkdirSync(path.join(gamePath, 'mods'));
+    } catch (err) {}
+
     // copy game files
     try {
         fs.cpSync(path.join(gamePath, '../Moonstone Island/'), path.join(gamePath, 'game/'), {recursive: true});
@@ -78,7 +76,10 @@ if(!fs.existsSync(path.join(gamePath, 'game/'))) {
         let html = data.toString();
         html = html.replace('<title>Moonstone Island</title>', '<title>Moonstone Island | Modded Alpha</title>');
         html = html.replace('</body>', `
+        <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
         <script>
+            let mimlAPIGlobal={};
+            ${htmlPatches.modLoaderClient}
             ${htmlPatches.hiddenMenu}
         </script>
         </body>`);
@@ -95,6 +96,25 @@ if(!fs.existsSync(path.join(gamePath, 'game/'))) {
 } else {
     console.log('Skipping first time setup (game files already exist)');
 }
+
+console.log('Loading mods');
+fs.readdirSync(path.join(gamePath, 'mods')).forEach(async file => {
+    if (file.endsWith('.zip')) {
+        console.log(`Installing ${file}`);
+        // extract mod
+        await compressing.zip.uncompress(path.join(gamePath, 'mods', file), path.join(gamePath, 'mods', file.replace('.zip', ''))).then(() => {
+            console.log('Mod extracted');
+            fs.rmSync(path.join(gamePath, 'mods', file), {force: true});
+        });
+        // download dependencies
+        // const config = JSON.parse(fs.readFileSync(path.join(gamePath, 'mods', file.replace('.zip', ''), 'mod.json')).toString());
+        // console.log(config);
+    }
+    const mod = JSON.parse(fs.readFileSync(path.join(gamePath, 'mods', file.replace('.zip', ''), 'mod.json')).toString());
+    console.log(`Loading ${mod.name} (${mod.version}) by ${mod.author}`);
+    miml.mods.push(mod);
+    modLoaderServer.addImport(mod, gamePath);
+});
 
 console.log('Starting game');
 
@@ -116,8 +136,8 @@ switch (process.platform) {
         process.exit(0);
 }
 
+modLoaderServer.start();
 exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {
-    console.log('Game started :3');
     if (err) {
         console.error(err);
         return;
@@ -126,6 +146,13 @@ exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {
     console.error(stderr);
 }).on('exit', (code) => {
     console.log(`Game exited with code ${code}`);
+    modLoaderServer.stop();
     process.exit(0);
+}).on('spawn', () => {
+    console.log('Game started :3');
+    modLoaderServer.io.on('connection', () => {
+        modLoaderServer.import();
+        modLoaderServer.io.emit('global', miml);
+    });
 });
 })();

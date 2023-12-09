@@ -5,23 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch via NPM",
-            "request": "launch",
-            "runtimeArgs": [
-                "start"
-            ],
-            "runtimeExecutable": "npm",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node"
-        },
-
-        {
             "name": "Electron Main",
-            "program": "${workspaceFolder}/main.js",
+            "program": "${workspaceFolder:MIModLoader}/src/main.js",
             "request": "launch",
-            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+            "runtimeExecutable": "${workspaceFolder:MIModLoader}/node_modules/.bin/electron",
+            "cwd": "/home/saturn/Ext/SteamLibrary/steamapps/common/MIMLOADER/",
             "skipFiles": [
                 "<node_internals>/**"
             ],
