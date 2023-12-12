@@ -15,7 +15,6 @@ console.log('Starting MIML');
 let fatalError = false;
 
 (async () => {
-const open = await import('open');
 const gamePath = process.cwd();
 const miml = {
     mods: []
@@ -99,47 +98,6 @@ if(!fs.existsSync(path.join(gamePath, 'game/'))) {
 } else {
     console.log('Skipping first time setup (game files already exist)');
 }
-
-// console.log('Logging in via discord');
-// const app = express();
-// app.get('/auth/discord', (req, res) => {
-//     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1179513611719295106&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A5313%2Fauth%2Fdiscord%2Fcallback&scope=identify`);
-// });
-// app.get('/auth/discord/callback', async (req, res) => {
-//     res.send('Logged in via discord. You can close this tab now.');
-//     const code = req.query.code;
-
-//     const params = new URLSearchParams({
-//         client_id: '1179513611719295106',
-//         client_secret: 'UG3ZzM5HZu19GKtZJJ-xwjN7FpStFyR6',
-//         grant_type: 'authorization_code',
-//         code: code,
-//         redirect_uri: 'http://localhost:5313/auth/discord/callback',
-//         scope: 'identify'
-//     });
-
-//     const response = await axios.post('https://discord.com/api/oauth2/token', params, {
-//         headers: {
-//             'Content-Type': 'application/x-www-form-urlencoded'
-//         }
-//     });
-//     token = response.data.access_token;
-//     server.close();
-// });
-// const server = app.listen(5313, () => {
-//     console.log('Started express server');
-// });
-// await open.default('http://localhost:5313/auth/discord/');
-
-// const waitForLogin = () => {
-//     return new Promise((resolve, reject) => {
-//         server.on('close', () => {
-//             resolve();
-//         });
-//     });
-// };
-// await waitForLogin();
-
 
 console.log('Loading mods');
 fs.readdirSync(path.join(gamePath, 'mods')).forEach(async file => {
