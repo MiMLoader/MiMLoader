@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/c2arrayEditor/editor.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "cwd": "${workspaceFolder}/c2arrayEditor/"
+        },
+        {
             "name": "Electron Main",
             "program": "${workspaceFolder:MIModLoader}/src/main.js",
             "request": "launch",
