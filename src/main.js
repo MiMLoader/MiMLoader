@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const express = require('express');
 const nodeNotifier = require('node-notifier');
 const {console}= require('./assets/console.js');
 const {packagenw} = require('./assets/packageHandler.js');
@@ -7,11 +8,14 @@ const {modLoaderServer} = require('./assets/modLoaderServer.js');
 const htmlPatches = require('./patches/htmlPatches.js');
 const compressing = require('compressing');
 const { exec } = require('child_process');
+const axios = require('axios');
 console.clear();
 
 console.log('Starting MIML');
+let fatalError = false;
 
 (async () => {
+const open = await import('open');
 const gamePath = process.cwd();
 const miml = {
     mods: []
@@ -24,7 +28,6 @@ if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
     });
     process.exit(0);
 }
-
 
 // startup cleanup
 if(fs.existsSync(path.join(gamePath, 'tmp-package'))) { fs.rmSync(path.join(gamePath, 'tmp-package'), {recursive: true, force: true})};
@@ -97,6 +100,47 @@ if(!fs.existsSync(path.join(gamePath, 'game/'))) {
     console.log('Skipping first time setup (game files already exist)');
 }
 
+// console.log('Logging in via discord');
+// const app = express();
+// app.get('/auth/discord', (req, res) => {
+//     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1179513611719295106&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A5313%2Fauth%2Fdiscord%2Fcallback&scope=identify`);
+// });
+// app.get('/auth/discord/callback', async (req, res) => {
+//     res.send('Logged in via discord. You can close this tab now.');
+//     const code = req.query.code;
+
+//     const params = new URLSearchParams({
+//         client_id: '1179513611719295106',
+//         client_secret: 'UG3ZzM5HZu19GKtZJJ-xwjN7FpStFyR6',
+//         grant_type: 'authorization_code',
+//         code: code,
+//         redirect_uri: 'http://localhost:5313/auth/discord/callback',
+//         scope: 'identify'
+//     });
+
+//     const response = await axios.post('https://discord.com/api/oauth2/token', params, {
+//         headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded'
+//         }
+//     });
+//     token = response.data.access_token;
+//     server.close();
+// });
+// const server = app.listen(5313, () => {
+//     console.log('Started express server');
+// });
+// await open.default('http://localhost:5313/auth/discord/');
+
+// const waitForLogin = () => {
+//     return new Promise((resolve, reject) => {
+//         server.on('close', () => {
+//             resolve();
+//         });
+//     });
+// };
+// await waitForLogin();
+
+
 console.log('Loading mods');
 fs.readdirSync(path.join(gamePath, 'mods')).forEach(async file => {
     if (file.endsWith('.zip')) {
@@ -106,12 +150,38 @@ fs.readdirSync(path.join(gamePath, 'mods')).forEach(async file => {
             console.log('Mod extracted');
             fs.rmSync(path.join(gamePath, 'mods', file), {force: true});
         });
-        // download dependencies
-        // const config = JSON.parse(fs.readFileSync(path.join(gamePath, 'mods', file.replace('.zip', ''), 'mod.json')).toString());
-        // console.log(config);
     }
     const mod = JSON.parse(fs.readFileSync(path.join(gamePath, 'mods', file.replace('.zip', ''), 'mod.json')).toString());
-    console.log(`Loading ${mod.name} (${mod.version}) by ${mod.author}`);
+    console.log(`Loading ${mod.name} (${mod.version})`);
+    console.log('Checking dependencies');
+    const mods = fs.readdirSync(path.join(gamePath, 'mods'));
+    for (let i = 0; i < mod.dependencies.length; i++) {
+        const dependency = mod.dependencies[i];
+        if (!mods.includes(dependency)) {
+            console.error(`Missing dependency ${dependency}`);
+            nodeNotifier.notify({
+                title: 'MIML',
+                message: `Missing dependency ${dependency}, Installing...`
+            });
+            const headers = {
+                'Accept': 'application/json'
+            };
+
+            let response = await axios.get(`https://g-5846.modapi.io/v1/games/5846/mods?api_key=10d88d967c5d5f5f065dbc2388d7f738&name=${dependency}`, {headers: headers});
+            if (response.data.data.length == 0) {
+                console.error('Failed to find Dependency');
+                nodeNotifier.notify({
+                    title: 'MIML',
+                    message: `Failed to find Dependency ${dependency}, Please install it manually.`
+                });
+                process.kill(process.pid);
+
+            }
+            const downloadUrl = response.data.data[0].modfile.download.binary_url;
+            console.log(`Downloading ${downloadUrl}`);
+        }
+    }
+    console.log('Dependencies OK');    
     miml.mods.push(mod);
     modLoaderServer.addImport(mod, gamePath);
 });
@@ -137,7 +207,7 @@ switch (process.platform) {
 }
 
 modLoaderServer.start();
-exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {
+let msi = exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {
     if (err) {
         console.error(err);
         return;
@@ -149,6 +219,7 @@ exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {
     modLoaderServer.stop();
     process.exit(0);
 }).on('spawn', () => {
+    if (fatalError){msi.kill(); process.kill(process.pid); return;}
     console.log('Game started :3');
     modLoaderServer.io.on('connection', () => {
         modLoaderServer.import();
