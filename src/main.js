@@ -6,7 +6,6 @@ const {packagenw} = require('./assets/packageHandler.js');
 const {modLoaderServer} = require('./assets/modLoaderServer.js');
 const htmlPatches = require('./patches/htmlPatches.js');
 const compressing = require('compressing');
-const DiscordRPC = require('discord-rpc');
 const { exec } = require('child_process');
 console.clear();
 
@@ -137,22 +136,6 @@ switch (process.platform) {
         process.exit(0);
 }
 
-const clientId = '1179513611719295106';
-DiscordRPC.register(clientId);
-const rpc = new DiscordRPC.Client({transport: 'ipc'});
-const startTimestamp = new Date();
-rpc.on('ready', () => {
-    rpc.setActivity({
-        details: 'Playing Moonstone Island',
-        state: `${miml.mods.length} mods loaded`,
-        startTimestamp,
-        largeImageKey: 'icon',
-        largeImageText: 'Moonstone Island Mod Loader',
-        instance: false,
-    });
-});
-rpc.login({clientId}).catch(console.error);
-
 modLoaderServer.start();
 exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {
     if (err) {
@@ -171,6 +154,5 @@ exec(`"${executable}"`, {cwd: gamePath}, (err, stdout, stderr) => {
         modLoaderServer.import();
         modLoaderServer.io.emit('global', miml);
     });
-
 });
 })();
