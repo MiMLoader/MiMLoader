@@ -145,18 +145,27 @@ const loadMod = async (file) => {
                 });
             });
     }
-    const mod = JSON.parse(
-        fs
+    let mod;
+    try {
+        mod = JSON.parse(
+            fs
             .readFileSync(
-                path.join(
-                    gamePath,
-                    'mods',
-                    file.replace('.zip', ''),
-                    'mod.json'
-                )
-            )
-            .toString()
-    );
+                        path.join(
+                            gamePath,
+                            'mods',
+                            file.replace('.zip', ''),
+                            'mod.json'
+                        )
+                    ).toString()
+            );
+    } catch (err) {
+        console.error(`Failed to load mod ${file}. Err: ${err}`);
+        nodeNotifier.notify({
+            title: 'MIML',
+            message: `Failed to load mod ${file}. Err: ${err}`,
+        });
+        process.exit(0);
+    }
     console.log(`Loading ${mod.name} (${mod.version})`);
     console.log('Checking dependencies');
     const mods = fs.readdirSync(path.join(gamePath, 'mods'));
@@ -166,13 +175,24 @@ const loadMod = async (file) => {
             console.error(`Missing dependency ${dependency}`);
             const headers = {
                 Accept: 'application/json',
+                'User-Agent': 'miml',
             };
-
-            let response = await axios.get(
-                `https://g-5846.modapi.io/v1/games/5846/mods?api_key=10d88d967c5d5f5f065dbc2388d7f738&name=${dependency}`,
-                { headers: headers }
-            );
-            if (response.data.data.length == 0) {
+            let response;
+            try {
+                response = await axios.get(
+                    `https://localhost:3000/query/mods/${dependency}`,
+                    { headers: headers }
+                );
+            } catch (err) {
+                console.error(err);
+                nodeNotifier.notify({
+                    title: 'MIML',
+                    message: `Failed to find Dependency ${dependency} (${err}), Please install it manually.`,
+                });
+                process.kill(process.pid);
+            }
+            console.log(response)
+            if (response.data.result_total === 0) {
                 console.error('Failed to find Dependency');
                 nodeNotifier.notify({
                     title: 'MIML',
