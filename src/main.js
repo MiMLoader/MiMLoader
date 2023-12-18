@@ -189,7 +189,6 @@ const loadMod = async (file) => {
                     title: 'MIML',
                     message: `Failed to find Dependency ${dependency} (${err}), Please install it manually.`,
                 });
-                process.kill(process.pid);
             }
             console.log(response)
             if (response.data.result_total === 0) {
@@ -198,7 +197,6 @@ const loadMod = async (file) => {
                     title: 'MIML',
                     message: `Failed to find Dependency ${dependency}, Please install it manually.`,
                 });
-                process.kill(process.pid);
             }
             const downloadUrl =
                 response.data.data[0].modfile.download.binary_url;
