@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.SuperSecret }}
       - name: Install wine
         run: |
           sudo dpkg --add-architecture i386
