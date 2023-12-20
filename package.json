@@ -4,7 +4,7 @@
     "description": "Moonstone Island Mod Loader",
     "author": "Ahhh_Saturn",
     "private": true,
-    "version": "1.0.0",
+    "version": "1.1.0",
     "module": "src/main.js",
     "main": "src/main.js",
     "dependencies": {
@@ -42,11 +42,12 @@
             "icon": "src/assets/miml-icon.png"
         },
         "win": {
-            "icon": "src/assets/miml-icon.ico"
+            "icon": "src/assets/miml-icon.png"
         }
     },
     "scripts": {
         "pack": "electron-builder --dir",
-        "dist": "electron-builder -wl"
+        "dist": "electron-builder -wl",
+        "build": "npm run dist && node zipAssets.js"
     }
 }
