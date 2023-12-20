@@ -10,6 +10,7 @@ jobs:
       - shell: bash
         env:
           GH_TOKEN: ${{ secrets.SuperSecret }}
+      - run: echo $GH_TOKEN
       - name: Install wine
         run: |
           sudo dpkg --add-architecture i386
