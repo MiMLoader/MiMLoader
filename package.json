@@ -3,7 +3,6 @@
     "type": "commonjs",
     "description": "Moonstone Island Mod Loader",
     "author": "Ahhh_Saturn",
-    "private": true,
     "version": "1.1.0",
     "module": "src/main.js",
     "main": "src/main.js",
@@ -19,11 +18,10 @@
     "devDependencies": {
         "@types/web": "^0.0.120",
         "electron": "^27.1.2",
-        "electron-builder": "^24.9.1",
-        "jest": "^29.7.0"
+        "electron-builder": "^24.9.1"
     },
     "build": {
-        "appId": "com.astraeffect.miml",
+        "appId": "com.mimloader.miml",
         "productName": "Moonstone Island Mod Loader",
         "fileAssociations": {
             "ext": "miml",
@@ -32,7 +30,9 @@
         },
         "files": [
             "src/**/*",
-            "package.json"
+            "package.json",
+            "LICENSE",
+            "README.md"
         ],
         "linux": {
             "target": [
@@ -47,7 +47,7 @@
     },
     "scripts": {
         "pack": "electron-builder --dir",
-        "dist": "electron-builder -wl",
+        "dist": "electron-builder -wl -p never",
         "build": "npm run dist && node zipAssets.js"
     }
 }
