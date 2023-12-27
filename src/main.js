@@ -173,59 +173,66 @@ const loadMod = async (file) => {
         const dependency = mod.dependencies[i];
         if (!mods.includes(dependency)) {
             console.error(`Missing dependency ${dependency}`);
-            const headers = {
-                Accept: 'application/json',
-                'User-Agent': 'miml',
-            };
-            let response;
-            try {
-                response = await axios.get(
-                    `https://localhost:3000/query/mods/${dependency}`,
-                    { headers: headers }
-                );
-            } catch (err) {
-                console.error(err);
-                nodeNotifier.notify({
-                    title: 'MIML',
-                    message: `Failed to find Dependency ${dependency} (${err}), Please install it manually.`,
-                });
-            }
-            console.log(response)
-            if (response.data.result_total === 0) {
-                console.error('Failed to find Dependency');
-                nodeNotifier.notify({
-                    title: 'MIML',
-                    message: `Failed to find Dependency ${dependency}, Please install it manually.`,
-                });
-            }
-            const downloadUrl =
-                response.data.data[0].modfile.download.binary_url;
-            console.log(`Downloading ${downloadUrl}`);
-            await axios
-                .get(downloadUrl, { responseType: 'stream' })
-                .then(async (response) => {
-                    console.log('Downloaded dependency');
-                    await new Promise((resolve, reject) => {
-                        const writer = fs.createWriteStream(
-                            path.join(gamePath, 'mods', dependency + '.zip')
-                        );
-                        response.data.pipe(writer);
-                        let error = null;
-                        writer.on('error', (err) => {
-                            error = err;
-                            writer.close();
-                            reject(err);
-                        });
-                        writer.on('close', () => {
-                            if (!error) {
-                                resolve();
-                            }
+            if (key) {
+                const headers = {
+                    Accept: 'application/json',
+                    'User-Agent': 'miml',
+                };
+                let response;
+                try {
+                    response = await axios.get(
+                        `https://g-5846.modapi.io/v1/games/5846/mods?api_key=${key}&name=${dependency}`,
+                        { headers: headers }
+                    );
+                } catch (err) {
+                    console.error(err);
+                    nodeNotifier.notify({
+                        title: 'MIML',
+                        message: `Failed to find Dependency ${dependency} (${err}), Please install it manually.`,
+                    });
+                }
+                console.log(response)
+                if (response.data.result_total === 0) {
+                    console.error('Failed to find Dependency');
+                    nodeNotifier.notify({
+                        title: 'MIML',
+                        message: `Failed to find Dependency ${dependency}, Please install it manually.`,
+                    });
+                }
+                const downloadUrl =
+                    response.data.data[0].modfile.download.binary_url;
+                console.log(`Downloading ${downloadUrl}`);
+                await axios
+                    .get(downloadUrl, { responseType: 'stream' })
+                    .then(async (response) => {
+                        console.log('Downloaded dependency');
+                        await new Promise((resolve, reject) => {
+                            const writer = fs.createWriteStream(
+                                path.join(gamePath, 'mods', dependency + '.zip')
+                            );
+                            response.data.pipe(writer);
+                            let error = null;
+                            writer.on('error', (err) => {
+                                error = err;
+                                writer.close();
+                                reject(err);
+                            });
+                            writer.on('close', () => {
+                                if (!error) {
+                                    resolve();
+                                }
+                            });
                         });
                     });
+                console.log('Installing dependency');
+                await loadMod(dependency + '.zip');
+                console.log('Dependency installed');
+            } else {
+                nodeNotifier.notify({
+                    title: 'MIML',
+                    message: `Missing dependency ${dependency}, Please install it manually or relaunch with an Auth Key.`,
                 });
-            console.log('Installing dependency');
-            await loadMod(dependency + '.zip');
-            console.log('Dependency installed');
+            }
         }
     }
     console.log('Dependencies Ok');
