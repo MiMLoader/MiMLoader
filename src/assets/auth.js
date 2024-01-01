@@ -1,43 +1,50 @@
 const { shell } = require('electron');
 const express = require('express');
-const axios = require('axios');
+const { console } = require('./console.js');
 
-const server = express();
+const app = express();
 
-
-server.get('/auth/login', (req, res) => {
-    res.sendFile(__dirname + '/login.html')
+app.get('/auth/discord/callback', async (req, res) => {
+	const code = req.query.code;
+	const access_token = req.query.access_token;
+    if (code !== '200') {
+		res.sendFile(__dirname + '/error.html');
+		console.warn('Auth failed');
+        return auth.resolve();
+    }
+	console.log('Auth success');
+	res.sendFile(__dirname + '/callback.html');
+	auth.token = access_token;
+	auth.isAuth = true;
+    return auth.resolve();
 });
-
-server.get('/auth/discord', (req, res) => {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=1179513611719295106&response_type=code&redirect_uri=https%3A%2F%2Fmimloader.com%2Fauth%2Fdiscord%2Fcallback&scope=identify`);
-});
-server.get('/auth/discord/callback', async (req, res) => {
-    console.log(req.query.token)
-});
-
+let server;
 const auth = {
+    resolve: null,
     isAuth: false,
-    isConsent: false,
-    token: null,
-    server: {
-        start: () => {
-            return new Promise((resolve) => {
-                server.listen(5313, () => {
-                    console.log('Auth server started on port 5313');
-                    resolve();
-                });
-            });
-        },
-        stop: () => {
-            server.close()
-        },
-        app: server
-    },
-    start: async () => {
-        await auth.server.start();
-        shell.openExternal('http://localhost:5313/auth/login');
-    },
+	token: null,
+	server: {
+		start: () => {
+			return new Promise((resolve) => {
+				server = app.listen(5313, () => {
+					resolve();
+				});
+			});
+		},
+		stop: () => {
+			server.close();
+		},
+	},
+	start: async () => {
+		await auth.server.start();
+        shell.openExternal('https://mimloader.com/auth/login');
+        await auth.complete;
+        auth.server.stop();
+	},
 };
+auth.complete = new Promise((resolve) => {
+    auth.resolve = resolve;
+}),
 
-auth.start();
+
+module.exports = auth;
