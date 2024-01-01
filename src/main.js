@@ -206,7 +206,7 @@ console.log('Starting MIML');
 						});
 						process.exit(0);
 					}
-					console.log(response)
+					console.log(response);
 					const downloadUrl =
 						response.data.data[0].modfile.download.binary_url;
 					console.log(`Downloading ${downloadUrl}`);
@@ -253,12 +253,17 @@ console.log('Starting MIML');
 		modLoaderServer.addImport(mod, gamePath);
 	};
 	await new Promise((resolve, reject) => {
-		fs.readdirSync(path.join(gamePath, 'mods')).forEach(
-			async (file, index, array) => {
-				await loadMod(file);
-				if (index === array.length - 1) resolve();
-			}
-		);
+		if (fs.readdirSync(path.join(gamePath, 'mods')).length === 0) {
+			console.log('No mods found');
+			resolve();
+		} else {
+			fs.readdirSync(path.join(gamePath, 'mods')).forEach(
+				async (file, index, array) => {
+					await loadMod(file);
+					if (index === array.length - 1) resolve();
+				}
+			);
+		}
 	}).catch((err) => {
 		console.error(err);
 		nodeNotifier.notify({
