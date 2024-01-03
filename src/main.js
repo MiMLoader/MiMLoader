@@ -4,9 +4,20 @@ const nodeNotifier = require('node-notifier');
 const { modLoaderServer } = require('./assets/modLoaderServer.js');
 const { firstTimeSetup, loadMod, auth } = require('./assets/utils.js');
 const { exec } = require('child_process');
+const { app } = require('electron');
 console.clear();
 
 console.log('Starting MIML');
+
+// Check if already running
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+	nodeNotifier.notify({
+		title: 'MIML',
+		message: 'MIML is already running',
+	});
+	process.exit(0);
+}
 
 (async () => {
 	const gamePath = process.cwd();
