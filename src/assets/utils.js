@@ -267,7 +267,7 @@ const loadMod = async (file, miml) => {
 						});
 					});
 				console.log('Installing dependency');
-				await loadMod(dependency + '.zip');
+				await loadMod(dependency + '.zip', miml);
 				console.log('Dependency installed');
 			} else {
 				nodeNotifier.notify({
