@@ -8,7 +8,6 @@ const { modLoaderServer } = require('./modLoaderServer.js');
 const { shell } = require('electron');
 const express = require('express');
 
-
 const gamePath = process.cwd();
 
 const firstTimeSetup = async () => {
@@ -26,13 +25,16 @@ const firstTimeSetup = async () => {
 				title: 'MIML',
 				message: `Failed to create mods folder. Err: ${err}`,
 			});
-			process.exit(0);	
+			process.exit(0);
 		}
 	}
 
 	// create config.json file
 	try {
-		fs.writeFileSync(path.join(gamePath, 'config.json'), JSON.stringify({}));
+		fs.writeFileSync(
+			path.join(gamePath, 'config.json'),
+			JSON.stringify({})
+		);
 	} catch (err) {
 		console.error(err);
 		nodeNotifier.notify({
@@ -41,7 +43,7 @@ const firstTimeSetup = async () => {
 		});
 		process.exit(0);
 	}
-	
+
 	// copy game files
 	try {
 		fs.cpSync(
@@ -248,11 +250,7 @@ const loadMod = async (file, miml) => {
 						console.log('Downloaded dependency');
 						await new Promise((resolve, reject) => {
 							const writer = fs.createWriteStream(
-								path.join(
-									gamePath,
-									'mods',
-									dependency + '.zip'
-								)
+								path.join(gamePath, 'mods', dependency + '.zip')
 							);
 							response.data.pipe(writer);
 							let error = null;
@@ -290,29 +288,39 @@ const app = express();
 app.get('/auth/discord/callback', async (req, res) => {
 	const code = req.query.code;
 	const access_token = req.query.access_token;
-    if (code !== '200') {
+	if (code !== '200') {
 		res.sendFile(__dirname + '/error.html');
 		console.warn('Auth failed');
-        return auth.resolve();
-    }
+		return auth.resolve();
+	}
 	console.log('Auth success');
 	res.sendFile(__dirname + '/callback.html');
 	auth.token = access_token;
 	auth.isAuth = true;
-    return auth.resolve();
+	return auth.resolve();
 });
 
 let server;
 const auth = {
-    resolve: null,
-    isAuth: false,
+	resolve: null,
+	isAuth: false,
 	token: null,
+	port: 5313,
 	server: {
 		start: () => {
 			return new Promise((resolve) => {
-				server = app.listen(5313, () => {
-					resolve();
-				});
+				try {
+					server = app.listen(auth.port, () => {
+						resolve();
+					});
+				} catch (err) {
+					console.error(err);
+					nodeNotifier.notify({
+						title: 'MIML',
+						message: `Failed to start auth server. Err: ${err}`,
+					});
+					process.exit(0);
+				}
 			});
 		},
 		stop: () => {
@@ -321,18 +329,28 @@ const auth = {
 	},
 	start: async () => {
 		await auth.server.start();
-        shell.openExternal('https://mimloader.com/auth/login');
-        await auth.complete;
-        auth.server.stop();
+		shell.openExternal('https://mimloader.com/auth/login');
+
+		// wait 1min for auth
+		setTimeout(() => {
+			if (!auth.isAuth) {
+				console.warn('Auth timed out');
+				auth.server.stop();
+				auth.resolve();
+			}
+		}, 60000);
+
+		// natural completion
+		await auth.complete;
+		auth.server.stop();
 	},
 };
-auth.complete = new Promise((resolve) => {
-    auth.resolve = resolve;
-}),
-
-module.exports = {
-	firstTimeSetup,
-	packagenw,
-	loadMod,
-	auth,
-};
+(auth.complete = new Promise((resolve) => {
+	auth.resolve = resolve;
+})),
+	(module.exports = {
+		firstTimeSetup,
+		packagenw,
+		loadMod,
+		auth,
+	});
