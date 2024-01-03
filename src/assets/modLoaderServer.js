@@ -47,6 +47,7 @@ exports.modLoaderServer = {
 			io.emit('import', mod);
 			console.log(`Imported ${mod.name}`);
 		});
+		io.emit('importDone');
 	},
 	io: io,
 };
