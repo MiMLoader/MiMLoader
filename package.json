@@ -3,7 +3,7 @@
     "type": "commonjs",
     "description": "Moonstone Island Mod Loader",
     "author": "Ahhh_Saturn",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "module": "src/main.js",
     "main": "src/main.js",
     "dependencies": {
