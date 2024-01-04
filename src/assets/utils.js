@@ -3,10 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const htmlPatches = require('../patches/htmlPatches.js');
 const nodeNotifier = require('node-notifier');
-const axios = require('axios');
 const { modLoaderServer } = require('./modLoaderServer.js');
-const { shell } = require('electron');
-const express = require('express');
 
 const gamePath = process.cwd();
 
@@ -213,69 +210,11 @@ const loadMod = async (file, miml) => {
 		const dependency = mod.dependencies[i];
 		if (!mods.includes(dependency)) {
 			console.error(`Missing dependency ${dependency}`);
-			if (auth.isAuth) {
-				const headers = {
-					Accept: 'application/json',
-					'Content-Type': 'application/x-www-form-urlencoded',
-					Authorization: `Bearer ${auth.token}`,
-				};
-				let response = await axios
-					.get(
-						`https://g-5846.modapi.io/v1/games/5846/mods?api_key=10d88d967c5d5f5f065dbc2388d7f738&name_id=${dependency}`,
-						{ headers: headers }
-					)
-					.catch((err) => {
-						console.error(err);
-						nodeNotifier.notify({
-							title: 'MIML',
-							message: `Failed to find Dependency ${dependency}, Please install it manually. Err: ${err}`,
-						});
-						process.exit(0);
-					});
-
-				if (response.data.result_total === 0) {
-					console.error('Failed to find Dependency');
-					nodeNotifier.notify({
-						title: 'MIML',
-						message: `Failed to find Dependency ${dependency}, Please install it manually.`,
-					});
-					process.exit(0);
-				}
-				const downloadUrl =
-					response.data.data[0].modfile.download.binary_url;
-				console.log(`Downloading ${downloadUrl}`);
-				await axios
-					.get(downloadUrl, { responseType: 'stream' })
-					.then(async (response) => {
-						console.log('Downloaded dependency');
-						await new Promise((resolve, reject) => {
-							const writer = fs.createWriteStream(
-								path.join(gamePath, 'mods', dependency + '.zip')
-							);
-							response.data.pipe(writer);
-							let error = null;
-							writer.on('error', (err) => {
-								error = err;
-								writer.close();
-								reject(err);
-							});
-							writer.on('close', () => {
-								if (!error) {
-									resolve();
-								}
-							});
-						});
-					});
-				console.log('Installing dependency');
-				await loadMod(dependency + '.zip', miml);
-				console.log('Dependency installed');
-			} else {
-				nodeNotifier.notify({
-					title: 'MIML',
-					message: `Missing dependency ${dependency}, Please install it manually or relaunch with an Auth Key.`,
-				});
-				process.exit(0);
-			}
+			nodeNotifier.notify({
+				title: 'MIML',
+				message: `Missing dependency ${dependency}, Please install it manually.`,
+			});
+			process.exit(0);
 		}
 	}
 	console.log('Dependencies Ok');
@@ -283,74 +222,9 @@ const loadMod = async (file, miml) => {
 	modLoaderServer.addImport(mod, gamePath);
 };
 
-const app = express();
-
-app.get('/auth/discord/callback', async (req, res) => {
-	const code = req.query.code;
-	const access_token = req.query.access_token;
-	if (code !== '200') {
-		res.sendFile(__dirname + '/error.html');
-		console.warn('Auth failed');
-		return auth.resolve();
-	}
-	console.log('Auth success');
-	res.sendFile(__dirname + '/callback.html');
-	auth.token = access_token;
-	auth.isAuth = true;
-	return auth.resolve();
-});
-
-let server;
-const auth = {
-	resolve: null,
-	isAuth: false,
-	token: null,
-	port: 5313,
-	server: {
-		start: () => {
-			return new Promise((resolve) => {
-				try {
-					server = app.listen(auth.port, () => {
-						resolve();
-					});
-				} catch (err) {
-					console.error(err);
-					nodeNotifier.notify({
-						title: 'MIML',
-						message: `Failed to start auth server. Err: ${err}`,
-					});
-					process.exit(0);
-				}
-			});
-		},
-		stop: () => {
-			server.close();
-		},
-	},
-	start: async () => {
-		await auth.server.start();
-		shell.openExternal('https://mimloader.com/auth/login');
-
-		// wait 1min for auth
-		setTimeout(() => {
-			if (!auth.isAuth) {
-				console.warn('Auth timed out');
-				auth.server.stop();
-				auth.resolve();
-			}
-		}, 60000);
-
-		// natural completion
-		await auth.complete;
-		auth.server.stop();
-	},
+module.exports = {
+	firstTimeSetup,
+	packagenw,
+	loadMod,
+	auth,
 };
-(auth.complete = new Promise((resolve) => {
-	auth.resolve = resolve;
-})),
-	(module.exports = {
-		firstTimeSetup,
-		packagenw,
-		loadMod,
-		auth,
-	});
