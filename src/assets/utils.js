@@ -226,5 +226,4 @@ module.exports = {
 	firstTimeSetup,
 	packagenw,
 	loadMod,
-	auth,
 };

@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const nodeNotifier = require('node-notifier');
 const { modLoaderServer } = require('./assets/modLoaderServer.js');
-const { firstTimeSetup, loadMod, auth } = require('./assets/utils.js');
+const { firstTimeSetup, loadMod } = require('./assets/utils.js');
 const { exec } = require('child_process');
 const { app } = require('electron');
 console.clear();
@@ -49,10 +49,6 @@ if (!gotTheLock) {
 	} else {
 		console.log('Skipping first time setup (game files already exist)');
 	}
-
-	console.log('Attempting to authenticate');
-	await auth.start();
-	console.log('Auth flow complete');
 
 	console.log('Loading mods');
 	await new Promise((resolve) => {
