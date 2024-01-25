@@ -31,17 +31,17 @@
             position: absolute;
             top: 0;
             right: 0;
-            margin: 10px;
-            padding: 10px;
+            background: none;
             border: none;
-            background-color: #ff0000;
-            color: #ffffff;
-            font-size: 20px;
             cursor: pointer;
             z-index: 99;
         }
+        #close img {
+            aspect-ratio: 1/1;
+            width: 25px;
+        }
     </style>
-    <button onclick="window.close()" id="close">Close</button>
+    <button onclick="window.close()" id="close"><img src="./close.png"></button>
     <div class="errorParent">
         <p>Oh no! Something went wrong launching the modded client.</p>
         <p id="error">Error</p>
