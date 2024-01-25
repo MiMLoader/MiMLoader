@@ -29,7 +29,7 @@ Either follow this guide or install on steam.
 Join the Moonstone Island modding community to share your creations, get help, and stay informed about the latest mods and updates. We encourage collaboration and the sharing of ideas to enrich the gaming experience for everyone.
 
 - Community Website: [mimloader.com](https://mimloader.com)
-- Discord Server: [discord.gg/moonstone-mods](https://discord.gg/moonstone-mods)
+- Discord Server: [discord.com/](https://discord.com/invite/ngbvgTEFU2)
 
 ## Contributing
 
