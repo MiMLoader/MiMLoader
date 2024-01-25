@@ -43,6 +43,9 @@ If you encounter any issues or have suggestions for improvements, please report 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Contributors
+- RollyGames - X Button on Error Display
+
 ---
 
 Thank you for choosing the Moonstone Island Mod Loader. Happy modding!
