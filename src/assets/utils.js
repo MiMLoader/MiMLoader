@@ -2,8 +2,8 @@ const compressing = require('compressing');
 const path = require('path');
 const fs = require('fs');
 const htmlPatches = require('../patches/htmlPatches.js');
-const nodeNotifier = require('node-notifier');
 const { modLoaderServer } = require('./modLoaderServer.js');
+const { BrowserWindow, app } = require('electron');
 
 const gamePath = process.cwd();
 
@@ -17,12 +17,7 @@ const firstTimeSetup = async () => {
 		if (err.code === 'EEXIST') {
 			console.log('Mods folder already exists');
 		} else {
-			console.error(err);
-			nodeNotifier.notify({
-				title: 'MIML',
-				message: `Failed to create mods folder. Err: ${err}`,
-			});
-			process.exit(0);
+			await displayError(`Failed to create mods folder, ${err}`);
 		}
 	}
 
@@ -33,12 +28,7 @@ const firstTimeSetup = async () => {
 			JSON.stringify({})
 		);
 	} catch (err) {
-		console.error(err);
-		nodeNotifier.notify({
-			title: 'MIML',
-			message: `Failed to create config.json. Err: ${err}`,
-		});
-		process.exit(0);
+		await displayError(`Failed to create config.json file, ${err}`);
 	}
 
 	// copy game files
@@ -49,12 +39,7 @@ const firstTimeSetup = async () => {
 			{ recursive: true }
 		);
 	} catch (err) {
-		console.error(err);
-		nodeNotifier.notify({
-			title: 'MIML',
-			message: `Failed to copy over game files. Err: ${err}`,
-		});
-		process.exit(0);
+		await displayError(`Failed to copy game files, ${err}`);
 	}
 
 	await packagenw.decompress();
@@ -108,14 +93,9 @@ const firstTimeSetup = async () => {
 			fs.writeFile(
 				path.join(gamePath, 'tmp-package', 'index.html'),
 				html,
-				(err) => {
+				async (err) => {
 					if (err) {
-						console.error(err);
-						nodeNotifier.notify({
-							title: 'MIML',
-							message: `Failed to patch index.html. Err: ${err}`,
-						});
-						process.exit(0);
+						await displayError(`Failed to patch game, ${err}`);
 					}
 				}
 			);
@@ -136,13 +116,8 @@ const packagenw = {
 				path.join(gamePath, 'game/package.nw'),
 				path.join(gamePath, 'tmp-package')
 			)
-			.catch((err) => {
-				console.error(err);
-				nodeNotifier.notify({
-					title: 'MIML',
-					message: `Failed to decompress package.nw. Err: ${err}`,
-				});
-				process.exit(0);
+			.catch(async (err) => {
+				await displayError(`Failed to decompress package, ${err}`);
 			});
 	},
 	compress: async () => {
@@ -152,13 +127,8 @@ const packagenw = {
 				path.join(gamePath, 'game/package.nw'),
 				{ ignoreBase: true }
 			)
-			.catch((err) => {
-				console.error(err);
-				nodeNotifier.notify({
-					title: 'MIML',
-					message: `Failed to compress package.nw. Err: ${err}`,
-				});
-				process.exit(0);
+			.catch(async (err) => {
+				await displayError(`Failed to compress package, ${err}`);
 			});
 	},
 };
@@ -194,12 +164,7 @@ const loadMod = async (file, miml) => {
 				.toString()
 		);
 	} catch (err) {
-		console.error(`Failed to load mod ${file}. Err: ${err}`);
-		nodeNotifier.notify({
-			title: 'MIML',
-			message: `Failed to load mod ${file}. Err: ${err}`,
-		});
-		process.exit(0);
+		await displayError(`Failed to load mod ${file}, ${err}`);
 	}
 
 	console.log(`Loading ${mod.name} (${mod.version})`);
@@ -209,12 +174,9 @@ const loadMod = async (file, miml) => {
 	for (let i = 0; i < mod.dependencies.length; i++) {
 		const dependency = mod.dependencies[i];
 		if (!mods.includes(dependency)) {
-			console.error(`Missing dependency ${dependency}`);
-			nodeNotifier.notify({
-				title: 'MIML',
-				message: `Missing dependency ${dependency}, Please install it manually.`,
-			});
-			process.exit(0);
+			await displayError(
+				`Missing dependency ${dependency} for mod ${mod.name}`
+			);
 		}
 	}
 	console.log('Dependencies Ok');
@@ -222,8 +184,36 @@ const loadMod = async (file, miml) => {
 	modLoaderServer.addImport(mod, gamePath);
 };
 
+const displayError = async (err) => {
+	console.error(err);
+	const loadWindow = () => {
+		const errorWindow = new BrowserWindow({
+			width: 1114,
+			height: 358,
+			frame: false,
+			transparent: true,
+			center: true,
+			alwaysOnTop: true,
+			resizable: false,
+		});
+		errorWindow.loadFile(path.join(__dirname, './error.html'));
+		errorWindow.webContents.on('did-finish-load', () => {
+			errorWindow.webContents.executeJavaScript(
+				`document.getElementById('error').innerHTML = '${err}'`
+			);
+		});
+		errorWindow.on('closed', () => {
+			errorWindow.destroy();
+			process.exit(0);
+		});
+	};
+	app.whenReady().then(loadWindow);
+	await new Promise(() => {});
+};
+
 module.exports = {
 	firstTimeSetup,
 	packagenw,
 	loadMod,
+	displayError,
 };
