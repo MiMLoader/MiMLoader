@@ -19,7 +19,7 @@
             "program": "${workspaceFolder:MIModLoader}/src/main.js",
             "request": "launch",
             "runtimeExecutable": "${workspaceFolder:MIModLoader}/node_modules/.bin/electron",
-            "cwd": "/media/Extended/Games/steamapps/common/Moonstone Island Mod Loader/",
+            "cwd": "/home/saturn/Ext/Games/Steam/steamapps/common/Moonstone Island Mod Loader Dev/",
             "skipFiles": [
                 "<node_internals>/**"
             ],

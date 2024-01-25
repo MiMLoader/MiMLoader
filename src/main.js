@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const nodeNotifier = require('node-notifier');
 const { modLoaderServer } = require('./assets/modLoaderServer.js');
-const { firstTimeSetup, loadMod } = require('./assets/utils.js');
+const { firstTimeSetup, loadMod, displayError } = require('./assets/utils.js');
 const { exec } = require('child_process');
 console.clear();
 
@@ -16,12 +16,7 @@ console.log('Starting MIML');
 
 	// Detect if game files exist
 	if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
-		nodeNotifier.notify({
-			title: 'MIML',
-			message:
-				'Original game files not found. Check out the installation guide.',
-		});
-		process.exit(0);
+		await displayError('Original game files not found. Check out the installation guide.');
 	}
 
 	// Startup cleanup
@@ -52,13 +47,8 @@ console.log('Starting MIML');
 				}
 			);
 		}
-	}).catch((err) => {
-		console.error(err);
-		nodeNotifier.notify({
-			title: 'MIML',
-			message: `Failed to load mods. Err: ${err}`,
-		});
-		process.exit(0);
+	}).catch(async (err) => {
+		await displayError(`Failed to load mods, ${err}`);
 	});
 
 	console.log('Starting game');
@@ -82,9 +72,9 @@ console.log('Starting MIML');
 	}
 
 	modLoaderServer.start();
-	exec(`"${executable}"`, { cwd: gamePath }, (err, stdout, stderr) => {
+	exec(`"${executable}"`, { cwd: gamePath }, async (err, stdout, stderr) => {
 		if (err) {
-			console.error(err);
+			await displayError(`Failed to start game, ${err}`);
 			return;
 		}
 		console.log(stdout);

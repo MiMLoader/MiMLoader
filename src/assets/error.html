@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .errorParent {
+            position: absolute;
+            display: flex;
+            padding-top: 150px;
+            flex-direction: column;
+            padding-left: 30px;
+            width: 100%;
+            height: 100%;
+        }
+        #error {
+            width: 62%;
+            height: 40%;
+        }
+        #close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 10px;
+            padding: 10px;
+            border: none;
+            background-color: #ff0000;
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 99;
+        }
+    </style>
+    <button onclick="window.close()" id="close">Close</button>
+    <div class="errorParent">
+        <p>Oh no! Something went wrong launching the modded client.</p>
+        <p id="error">Error</p>
+    </div>
+    <img src="./error.png" alt="error" style="width: 100%; height: 100%; object-fit: contain;">
+</body>
+</html>
