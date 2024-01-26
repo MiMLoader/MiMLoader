@@ -77,7 +77,7 @@ const firstTimeSetup = async () => {
 			let html = data.toString();
 			html = html.replace(
 				'<title>Moonstone Island</title>',
-				'<title>Moonstone Island | Modded Alpha</title>'
+				'<title>Moonstone Island Mod Loader</title>'
 			);
 			html = html.replace(
 				'</body>',
