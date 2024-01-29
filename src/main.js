@@ -8,16 +8,14 @@ console.clear();
 
 console.log('Starting MIML');
 
-(async () => {
+
+(async () =>
+{
 	const gamePath = process.cwd();
+	const args = process.argv.slice(2);
 	const miml = {
 		mods: [],
 	};
-
-	// Detect if game files exist
-	if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
-		await displayError('Original game files not found. Check out the installation guide.');
-	}
 
 	// Startup cleanup
 	if (fs.existsSync(path.join(gamePath, 'tmp-package'))) {
@@ -28,26 +26,29 @@ console.log('Starting MIML');
 	}
 
 	// First time setup
-	if (!fs.existsSync(path.join(gamePath, 'game/'))) {
+	if (!fs.existsSync(path.join(gamePath, 'game/')) || args.includes('--repatch')) {
 		await firstTimeSetup();
 	} else {
 		console.log('Skipping first time setup (game files already exist)');
 	}
 
 	console.log('Loading mods');
-	await new Promise((resolve) => {
+	await new Promise((resolve) =>
+	{
 		if (fs.readdirSync(path.join(gamePath, 'mods')).length === 0) {
 			console.log('No mods found');
 			resolve();
 		} else {
 			fs.readdirSync(path.join(gamePath, 'mods')).forEach(
-				async (file, index, array) => {
+				async (file, index, array) =>
+				{
 					await loadMod(file, miml);
 					if (index === array.length - 1) resolve();
 				}
 			);
 		}
-	}).catch(async (err) => {
+	}).catch(async (err) =>
+	{
 		await displayError(`Failed to load mods, ${err}`);
 	});
 
@@ -72,7 +73,8 @@ console.log('Starting MIML');
 	}
 
 	modLoaderServer.start();
-	exec(`"${executable}"`, { cwd: gamePath }, async (err, stdout, stderr) => {
+	exec(`"${executable}"`, { cwd: gamePath }, async (err, stdout, stderr) =>
+	{
 		if (err) {
 			await displayError(`Failed to start game, ${err}`);
 			return;
@@ -80,14 +82,17 @@ console.log('Starting MIML');
 		console.log(stdout);
 		console.error(stderr);
 	})
-		.on('exit', (code) => {
+		.on('exit', (code) =>
+		{
 			console.log(`Game exited with code ${code}`);
 			modLoaderServer.stop();
 			process.exit(0);
 		})
-		.on('spawn', () => {
+		.on('spawn', () =>
+		{
 			console.log('Game started :3');
-			modLoaderServer.io.on('connection', () => {
+			modLoaderServer.io.on('connection', () =>
+			{
 				modLoaderServer.import();
 				modLoaderServer.io.emit('global', miml);
 			});

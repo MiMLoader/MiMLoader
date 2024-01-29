@@ -7,8 +7,14 @@ const { BrowserWindow, app } = require('electron');
 
 const gamePath = process.cwd();
 
-const firstTimeSetup = async () => {
+const firstTimeSetup = async () =>
+{
 	console.log('Performing first time setup');
+
+	// Detect if game files exist
+	if (!fs.existsSync(path.join(gamePath, '../Moonstone Island'))) {
+		await displayError('Original game files not found. Check out the installation guide.');
+	}
 
 	// create mods folder
 	try {
@@ -31,6 +37,16 @@ const firstTimeSetup = async () => {
 		await displayError(`Failed to create config.json file, ${err}`);
 	}
 
+	// clear old game files
+	if (fs.existsSync(path.join(gamePath, 'game'))) {
+		console.log('Clearing old game files');
+		try {
+			fs.rmSync(path.join(gamePath, 'game'), { recursive: true });
+		} catch (err) {
+			await displayError(`Failed to clear old game files, ${err}`);
+		}	
+	}
+
 	// copy game files
 	try {
 		fs.cpSync(
@@ -45,9 +61,11 @@ const firstTimeSetup = async () => {
 	await packagenw.decompress();
 
 	// enable chrome devtools
+	console.log('Enabling chrome devtools');
 	fs.readFile(
 		path.join(gamePath, 'tmp-package', 'package.json'),
-		(err, data) => {
+		(err, data) =>
+		{
 			if (err) throw err;
 			const json = JSON.parse(data.toString());
 			let chromiumArgs = json['chromium-args'].split(' ');
@@ -61,7 +79,29 @@ const firstTimeSetup = async () => {
 			fs.writeFile(
 				path.join(gamePath, 'tmp-package', 'package.json'),
 				JSON.stringify(json, null, 4),
-				(err) => {
+				(err) =>
+				{
+					if (err) throw err;
+				}
+			);
+		}
+	);
+
+	// patch in runtime interface
+	console.log('Patching in runtime interface');
+	fs.readFile(
+		path.join(gamePath, 'tmp-package', 'scripts', 'main.js'),
+		(err, data) =>
+		{
+			if (err) throw err;
+			let js = data.toString();
+			js = js.replace(/iRuntime=a;/, 'iRuntime=a;window.mimlRuntimeInterface=a;');
+
+			fs.writeFile(
+				path.join(gamePath, 'tmp-package', 'scripts', 'main.js'),
+				js,
+				(err) =>
+				{
 					if (err) throw err;
 				}
 			);
@@ -69,9 +109,11 @@ const firstTimeSetup = async () => {
 	);
 
 	// html patches
+	console.log('Applying html patches');
 	fs.readFile(
 		path.join(gamePath, 'tmp-package', 'index.html'),
-		(err, data) => {
+		(err, data) =>
+		{
 			if (err) throw err;
 
 			let html = data.toString();
@@ -93,7 +135,8 @@ const firstTimeSetup = async () => {
 			fs.writeFile(
 				path.join(gamePath, 'tmp-package', 'index.html'),
 				html,
-				async (err) => {
+				async (err) =>
+				{
 					if (err) {
 						await displayError(`Failed to patch game, ${err}`);
 					}
@@ -110,30 +153,35 @@ const firstTimeSetup = async () => {
 };
 
 const packagenw = {
-	decompress: async () => {
+	decompress: async () =>
+	{
 		await compressing.zip
 			.uncompress(
 				path.join(gamePath, 'game/package.nw'),
 				path.join(gamePath, 'tmp-package')
 			)
-			.catch(async (err) => {
+			.catch(async (err) =>
+			{
 				await displayError(`Failed to decompress package, ${err}`);
 			});
 	},
-	compress: async () => {
+	compress: async () =>
+	{
 		await compressing.zip
 			.compressDir(
 				path.join(gamePath, 'tmp-package'),
 				path.join(gamePath, 'game/package.nw'),
 				{ ignoreBase: true }
 			)
-			.catch(async (err) => {
+			.catch(async (err) =>
+			{
 				await displayError(`Failed to compress package, ${err}`);
 			});
 	},
 };
 
-const loadMod = async (file, miml) => {
+const loadMod = async (file, miml) =>
+{
 	if (file.endsWith('.zip')) {
 		console.log(`Installing ${file}`);
 		// extract mod
@@ -142,7 +190,8 @@ const loadMod = async (file, miml) => {
 				path.join(gamePath, 'mods', file),
 				path.join(gamePath, 'mods', file.replace('.zip', ''))
 			)
-			.then(() => {
+			.then(() =>
+			{
 				console.log('Mod extracted');
 				fs.rmSync(path.join(gamePath, 'mods', file), {
 					force: true,
@@ -184,9 +233,11 @@ const loadMod = async (file, miml) => {
 	modLoaderServer.addImport(mod, gamePath);
 };
 
-const displayError = async (err) => {
+const displayError = async (err) =>
+{
 	console.error(err);
-	const loadWindow = () => {
+	const loadWindow = () =>
+	{
 		const errorWindow = new BrowserWindow({
 			width: 1114,
 			height: 358,
@@ -197,18 +248,20 @@ const displayError = async (err) => {
 			resizable: false,
 		});
 		errorWindow.loadFile(path.join(__dirname, './error.html'));
-		errorWindow.webContents.on('did-finish-load', () => {
+		errorWindow.webContents.on('did-finish-load', () =>
+		{
 			errorWindow.webContents.executeJavaScript(
 				`document.getElementById('error').innerHTML = '${err}'`
 			);
 		});
-		errorWindow.on('closed', () => {
+		errorWindow.on('closed', () =>
+		{
 			errorWindow.destroy();
 			process.exit(0);
 		});
 	};
 	app.whenReady().then(loadWindow);
-	await new Promise(() => {});
+	await new Promise(() => { });
 };
 
 module.exports = {
