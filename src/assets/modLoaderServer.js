@@ -10,6 +10,9 @@ const importQueue = [];
 
 io.on('connection', (socket) => {
 	console.log('Client connected');
+	socket.on('debug', (msg) => {
+		console.log('Client (debug):', msg);
+	});
 	socket.on('disconnect', () => {
 		console.log('Client disconnected');
 	});
