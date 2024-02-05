@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const nodeNotifier = require('node-notifier');
 const { modLoaderServer } = require('./assets/modLoaderServer.js');
 const { firstTimeSetup, loadMod, displayError } = require('./assets/utils.js');
 const { exec } = require('child_process');
