@@ -216,6 +216,14 @@ const loadMod = async (file, miml) =>
 		await displayError(`Failed to load mod ${file}, ${err}`);
 	}
 
+	// rename zip with mod name from mod.json
+	if (file.endsWith('.zip')) {
+		fs.renameSync(
+			path.join(gamePath, 'mods', file.replace('.zip', '')),
+			path.join(gamePath, 'mods', mod.name)
+		);
+	}
+
 	console.log(`Loading ${mod.name} (${mod.version})`);
 	console.log('Checking dependencies');
 	const mods = fs.readdirSync(path.join(gamePath, 'mods'));
