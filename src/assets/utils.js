@@ -44,7 +44,7 @@ const firstTimeSetup = async () =>
 			fs.rmSync(path.join(gamePath, 'game'), { recursive: true });
 		} catch (err) {
 			await displayError(`Failed to clear old game files, ${err}`);
-		}	
+		}
 	}
 
 	// copy game files
@@ -144,8 +144,24 @@ const firstTimeSetup = async () =>
 			);
 		}
 	);
-	fs.rmSync(path.join(gamePath, 'game/package.nw'), { force: true });
 
+	// change intro screen
+	console.log('Changing intro screen');
+
+	const mediaPath = fs.readdirSync(path.join(gamePath, 'tmp-package/media'));
+
+	const intro = mediaPath.find((file) => file.includes('Intro') && !file.includes('Music'));
+
+	if (intro) {
+		fs.rmSync(path.join(gamePath, 'tmp-package', 'media', intro), { force: true });
+		fs.copyFileSync
+			(
+				path.join(__dirname, 'intro.webm'),
+				path.join(gamePath, 'tmp-package', 'media', intro)
+			);
+	}
+
+	fs.rmSync(path.join(gamePath, 'game/package.nw'), { force: true });
 	await packagenw.compress();
 
 	fs.rmSync(path.join(gamePath, 'tmp-package'), { recursive: true });
