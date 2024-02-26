@@ -6,6 +6,7 @@ const { modLoaderServer } = require('./modLoaderServer.js');
 const { BrowserWindow, app } = require('electron');
 
 const gamePath = process.cwd();
+const preloadMods = [];
 
 const firstTimeSetup = async () =>
 {
@@ -253,8 +254,14 @@ const loadMod = async (file, miml) =>
 		}
 	}
 	console.log('Dependencies Ok');
-	miml.mods.push(mod);
-	modLoaderServer.addImport(mod, gamePath);
+
+	if (!mod.preload) {
+		miml.mods.push(mod);
+		modLoaderServer.addImport(mod, gamePath);
+	} else {
+		console.log(`Preloading ${mod.preload} for ${mod.name}`);
+		preloadMods.push(mod);
+	}
 };
 
 const displayError = async (err) =>
@@ -293,4 +300,5 @@ module.exports = {
 	packagenw,
 	loadMod,
 	displayError,
+	preloadMods,
 };
