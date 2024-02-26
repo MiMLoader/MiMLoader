@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const { modLoaderServer } = require('./assets/modLoaderServer.js');
-const { firstTimeSetup, loadMod, displayError } = require('./assets/utils.js');
+const { firstTimeSetup, loadMod, displayError, preloadMods } = require('./assets/utils.js');
 const { exec } = require('child_process');
 console.clear();
 
@@ -72,6 +72,18 @@ console.log('Starting MIML');
 	}
 
 	modLoaderServer.start();
+
+	preloadMods.forEach((mod) =>
+	{
+		const modPath = path.join(gamePath, 'mods', mod.name, mod.preload);
+		if (fs.existsSync(modPath)) {
+			console.log(`Preloading ${mod.name}`);
+			require(modPath);
+		} else {
+			console.log(`Failed to preload ${mod.name}`);
+		}
+	});
+
 	exec(`"${executable}"`, { cwd: gamePath }, async (err, stdout, stderr) =>
 	{
 		if (err) {
