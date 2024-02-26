@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const { modLoaderServer } = require('./assets/modLoaderServer.js');
-const { firstTimeSetup, loadMod, displayError, preloadMods } = require('./assets/utils.js');
+const { firstTimeSetup, loadMod, displayError, preloadMods, packagenw } = require('./assets/utils.js');
 const { exec } = require('child_process');
 console.clear();
 
@@ -29,6 +29,12 @@ console.log('Starting MIML');
 		await firstTimeSetup();
 	} else {
 		console.log('Skipping first time setup (game files already exist)');
+	}
+
+	if (args.includes('--unpack')) {
+		console.log('unpacking');
+		await packagenw.decompress();
+		return process.exit(0);
 	}
 
 	console.log('Loading mods');
