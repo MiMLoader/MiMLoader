@@ -129,7 +129,6 @@ const firstTimeSetup = async () =>
     <script>
     let mimlAPIGlobal={};
     ${htmlPatches.modLoaderClient}
-    ${htmlPatches.hiddenMenu}
     </script>
     </body>`
 			);
