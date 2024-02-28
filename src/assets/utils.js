@@ -59,12 +59,22 @@ const firstTimeSetup = async () =>
 		await displayError(`Failed to copy game files, ${err}`);
 	}
 
+	// decompress package.nw
+	fs.rename
+		(
+			path.join(gamePath, 'game/package.nw'),
+			path.join(gamePath, 'game/clean-package.nw'),
+			(err) =>
+			{
+				if (err) throw err;
+			}
+		);
 	await packagenw.decompress();
 
 	// enable chrome devtools
 	console.log('Enabling chrome devtools');
 	fs.readFile(
-		path.join(gamePath, 'tmp-package', 'package.json'),
+		path.join(gamePath, 'game', 'package.nw', 'package.json'),
 		(err, data) =>
 		{
 			if (err) throw err;
@@ -78,7 +88,7 @@ const firstTimeSetup = async () =>
 			}
 			json['chromium-args'] = chromiumArgs.join(' ');
 			fs.writeFile(
-				path.join(gamePath, 'tmp-package', 'package.json'),
+				path.join(gamePath, 'game', 'package.nw', 'package.json'),
 				JSON.stringify(json, null, 4),
 				(err) =>
 				{
@@ -91,7 +101,7 @@ const firstTimeSetup = async () =>
 	// patch in runtime interface
 	console.log('Patching in runtime interface');
 	fs.readFile(
-		path.join(gamePath, 'tmp-package', 'scripts', 'main.js'),
+		path.join(gamePath, 'game', 'package.nw', 'scripts', 'main.js'),
 		(err, data) =>
 		{
 			if (err) throw err;
@@ -99,7 +109,7 @@ const firstTimeSetup = async () =>
 			js = js.replace(/iRuntime=a;/, 'iRuntime=a;window.mimlRuntimeInterface=a;');
 
 			fs.writeFile(
-				path.join(gamePath, 'tmp-package', 'scripts', 'main.js'),
+				path.join(gamePath, 'game', 'package.nw', 'scripts', 'main.js'),
 				js,
 				(err) =>
 				{
@@ -112,7 +122,7 @@ const firstTimeSetup = async () =>
 	// html patches
 	console.log('Applying html patches');
 	fs.readFile(
-		path.join(gamePath, 'tmp-package', 'index.html'),
+		path.join(gamePath, 'game', 'package.nw', 'index.html'),
 		(err, data) =>
 		{
 			if (err) throw err;
@@ -133,7 +143,7 @@ const firstTimeSetup = async () =>
     </body>`
 			);
 			fs.writeFile(
-				path.join(gamePath, 'tmp-package', 'index.html'),
+				path.join(gamePath, 'game', 'package.nw', 'index.html'),
 				html,
 				async (err) =>
 				{
@@ -148,23 +158,23 @@ const firstTimeSetup = async () =>
 	// change intro screen
 	console.log('Changing intro screen');
 
-	const mediaPath = fs.readdirSync(path.join(gamePath, 'tmp-package/media'));
+	const mediaPath = fs.readdirSync(path.join(gamePath, 'game', 'package.nw', 'media'));
 
 	const intro = mediaPath.find((file) => file.includes('Intro') && !file.includes('Music'));
 
 	if (intro) {
-		fs.rmSync(path.join(gamePath, 'tmp-package', 'media', intro), { force: true });
+		fs.rmSync(path.join(gamePath, 'game', 'package.nw', 'media', intro), { force: true });
 		fs.copyFileSync
 			(
 				path.join(__dirname, 'intro.webm'),
-				path.join(gamePath, 'tmp-package', 'media', intro)
+				path.join(gamePath, 'game', 'package.nw', 'media', intro)
 			);
 	}
 
-	fs.rmSync(path.join(gamePath, 'game/package.nw'), { force: true });
-	await packagenw.compress();
+	// await packagenw.compress();
+	
+	fs.rmSync(path.join(gamePath, 'game/clean-package.nw'), { force: true });
 
-	fs.rmSync(path.join(gamePath, 'tmp-package'), { recursive: true });
 	console.log('First time setup complete');
 };
 
@@ -173,27 +183,27 @@ const packagenw = {
 	{
 		await compressing.zip
 			.uncompress(
+				path.join(gamePath, 'game/clean-package.nw'),
 				path.join(gamePath, 'game/package.nw'),
-				path.join(gamePath, 'tmp-package')
 			)
 			.catch(async (err) =>
 			{
 				await displayError(`Failed to decompress package, ${err}`);
 			});
 	},
-	compress: async () =>
-	{
-		await compressing.zip
-			.compressDir(
-				path.join(gamePath, 'tmp-package'),
-				path.join(gamePath, 'game/package.nw'),
-				{ ignoreBase: true }
-			)
-			.catch(async (err) =>
-			{
-				await displayError(`Failed to compress package, ${err}`);
-			});
-	},
+	// compress: async () =>
+	// {
+	// 	await compressing.zip
+	// 		.compressDir(
+	// 			path.join(gamePath, 'game', 'package.nw'),
+	// 			path.join(gamePath, 'game/package.nw'),
+	// 			{ ignoreBase: true }
+	// 		)
+	// 		.catch(async (err) =>
+	// 		{
+	// 			await displayError(`Failed to compress package, ${err}`);
+	// 		});
+	// },
 };
 
 const loadMod = async (file, miml) =>
