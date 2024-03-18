@@ -1,0 +1,27 @@
+{
+	"name": "mimloader",
+	"module": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"lint": "bunx @biomejs/biome check src",
+		"lint:fix": "bun lint --apply",
+		"bundle": "esbuild --bundle src/index.ts --outfile=out/index.js --platform=node --format=cjs --sourcemap=inline",
+		"build": "bun run lint && bun test && bun run bundle && pkg ./out/index.js --out-path ./bin"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.6.1",
+		"@types/bun": "latest",
+		"@types/fs-extra": "^11.0.4",
+		"esbuild": "^0.20.2",
+		"pkg": "^5.8.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"trustedDependencies": [
+		"@biomejs/biome"
+	],
+	"dependencies": {
+		"fs-extra": "^11.2.0"
+	}
+}

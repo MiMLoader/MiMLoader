@@ -130,5 +130,4 @@ dist
 .pnp.*
 
 build
-
-launch.json
+bin
