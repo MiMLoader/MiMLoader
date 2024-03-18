@@ -6,7 +6,7 @@
 		"lint": "bunx @biomejs/biome check src",
 		"lint:fix": "bun lint --apply",
 		"bundle": "esbuild --bundle src/index.ts --outfile=out/index.js --platform=node --format=cjs --sourcemap=inline",
-		"build": "bun run lint && bun test && bun run bundle && pkg ./out/index.js --out-path ./bin"
+		"build": "bun run lint && bun test && bun run bundle && pkg ./out/index.js --out-path ./bin --targets node18-linux-x64,node18-macos-x64,node18-win-x64"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.6.1",
