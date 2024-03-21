@@ -1,61 +1,31 @@
 {
-    "name": "mimodloader",
-    "type": "commonjs",
-    "description": "Moonstone Island Mod Loader",
-    "author": "Ahhh_Saturn",
-    "version": "1.5.2",
-    "module": "src/main.js",
-    "main": "src/main.js",
-    "dependencies": {
-        "compressing": "^1.10.0",
-        "express": "^4.18.2",
-        "path": "^0.12.7",
-        "socket.io": "^4.7.2"
-    },
-    "devDependencies": {
-        "@types/web": "^0.0.120",
-        "electron": "^27.1.2",
-        "electron-builder": "^24.9.1"
-    },
-    "build": {
-        "appId": "com.mimloader.miml",
-        "productName": "Moonstone Island Mod Loader",
-        "fileAssociations": {
-            "ext": "miml",
-            "name": "Moonstone Island Mod Loader",
-            "icon": "src/assets/miml-icon.png"
-        },
-        "files": [
-            "src/**/*",
-            "package.json",
-            "LICENSE",
-            "README.md"
-        ],
-        "linux": {
-            "target": [
-                "AppImage"
-            ],
-            "category": "Game",
-            "icon": "src/assets/miml-icon.png"
-        },
-        "win": {
-            "icon": "src/assets/miml-icon.png"
-        },
-        "nsis": {
-            "oneClick": false,
-            "perMachine": true,
-            "allowToChangeInstallationDirectory": true,
-            "installerIcon": "src/assets/miml-icon.ico",
-            "uninstallerIcon": "src/assets/miml-icon.ico",
-            "installerHeaderIcon": "src/assets/miml-icon.ico",
-            "createDesktopShortcut": true,
-            "createStartMenuShortcut": true,
-            "shortcutName": "Moonstone Island Mod Loader"
-        }
-    },
-    "scripts": {
-        "pack": "electron-builder --dir",
-        "dist": "electron-builder -wl -p never",
-        "build": "npm run dist && node zipAssets.js"
-    }
+  "name": "mimloader",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "lint": "bunx @biomejs/biome check src",
+    "lint:fix": "bun lint --apply",
+    "bundle": "esbuild --bundle src/index.ts --outfile=out/index.js --platform=node --format=cjs --target=node18 --packages=external",
+    "build": "bun run lint && bun test && bun run bundle && pkg ./out/index.js --out-path ./bin --targets node18-linux-x64,node18-macos-x64,node18-win-x64"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.6.1",
+    "@types/bun": "latest",
+    "@types/express": "^4.17.21",
+    "@types/fs-extra": "^11.0.4",
+    "esbuild": "^0.20.2",
+    "pkg": "^5.8.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ],
+  "dependencies": {
+    "compressing": "^1.10.0",
+    "express": "^4.18.3",
+    "fs-extra": "^11.2.0",
+    "ws": "^8.16.0"
+  }
 }
