@@ -1,8 +1,9 @@
 name: Create Release
 
 on: 
-  push:
-    tags: v*
+  merge_group: 
+    branches: 
+      - main
 
 jobs:
   build:
