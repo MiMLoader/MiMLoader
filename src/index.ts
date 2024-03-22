@@ -43,6 +43,11 @@ import { ipc, preloadModsList, startUp } from './lib';
 			.on('spawn', () => {
 				console.timeLog('Started', 'Moonstone Island');
 
+				for (const mod of preloadModsList) {
+					console.timeLog('Started', `Preloading mod: ${mod.name}`);
+					require(`${mod.path}`);
+				}
+
 				console.timeEnd('Started');
 			});
 	} else {
