@@ -79,7 +79,7 @@ export const firstTime = async () => {
 					.toString()
 					.replace(
 						'</body>',
-						'<script src="http://localhost:5131/compiledmods" type="module" defer></script></body>',
+						'<script src="http://localhost:5131/compiledmods" defer></script></body>',
 					),
 			);
 		});

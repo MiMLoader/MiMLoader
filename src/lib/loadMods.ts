@@ -55,16 +55,17 @@ export const compileMods = async () => {
 			path.join(process.cwd(), 'mods', file, 'mod.json'),
 		);
 
-		const preloadPath = path.join(
-			process.cwd(),
-			'mods',
-			modJson.name,
-			modJson.preload,
-			'',
-		);
-		modJson.path = preloadPath;
+		if (modJson.preload) {
+			const preloadPath = path.join(
+				process.cwd(),
+				'mods',
+				modJson.name,
+				modJson.preload,
+			);
+			modJson.path = preloadPath;
 
-		if (modJson.preload) preloadModsList.push(modJson);
+			preloadModsList.push(modJson);
+		}
 
 		if (fs.existsSync(path.join(process.cwd(), 'mods', file, 'assets')))
 			ipc.hostAssets(modJson.name);
