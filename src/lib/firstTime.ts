@@ -63,7 +63,6 @@ export const firstTime = async () => {
 				path.join(process.cwd(), 'game', 'package.nw', 'scripts', 'main.js'),
 				data
 					.toString()
-					// MIGHT NOT WORK PLS CHECK
 					.replace(/iRuntime=a;/, 'iRuntime=a;window.miml={runtime: a};'),
 			);
 		});
