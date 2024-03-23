@@ -1,29 +1,31 @@
 import path from 'node:path';
 import express from 'express';
 import * as fs from 'fs-extra';
+import {createServer} from 'node:http';
 import ws from 'ws';
 
-const server = express();
-
+const app = express();
+const server = createServer(app);
+const websocket = new ws.WebSocketServer({ noServer: true });
 class IPCServer {
+	private app = app;
 	private server = server;
-	private ws = new ws.Server({ noServer: true });
 	private port = 5131;
+	private websocket = websocket;
 	constructor() {
-		// @ts-ignore
-		this.server.on('upgrade', (req, socket, head) => {
-			this.ws.handleUpgrade(req, socket, head, (socket) => {
-				this.ws.emit('connection', socket, req);
-			});
+
+		this.server.on('upgrade', (request, socket, head) => {
+			try {
+				this.websocket.handleUpgrade(request, socket, head, (ws) => {
+					this.websocket.emit('connection', ws, request);
+				});
+			} catch (e) {
+				console.error(e);
+				socket.destroy();
+			}
 		});
 
-		this.ws.on('connection', (socket) => {
-			socket.on('message', (message) => {
-				console.log('received: %s', message);
-			});
-		});
-
-		this.server.get('/compiledmods', (req, res) => {
+		this.app.get('/compiledmods', (req, res) => {
 			if (
 				!fs.existsSync(path.join(process.cwd(), 'mods', 'compiled-mods.js'))
 			) {
@@ -45,7 +47,7 @@ class IPCServer {
 
 	hostAssets(name: string, location: string | null = null, mod = true) {
 		if (mod) {
-			this.server.use(
+			this.app.use(
 				`/mods/${name}/assets`,
 				express.static(path.join(process.cwd(), 'mods', name, 'assets')),
 			);
@@ -53,7 +55,7 @@ class IPCServer {
 			if (location === null) {
 				throw new Error('Location is required for non-mod assets');
 			}
-			this.server.use(
+			this.app.use(
 				`/${name}`,
 				express.static(path.join(process.cwd(), location as string)),
 			);
@@ -61,16 +63,12 @@ class IPCServer {
 	}
 
 	on(event: string, callback: (data: string) => void) {
-		this.ws.on(event, callback);
+		this.websocket.on(event, callback);
 	}
 
 	emit(data: string) {
 		// @ts-ignore
-		this.ws.clients[0].send(data);
-	}
-
-	close() {
-		this.ws.close();
+		this.websocket.clients[0].send(data);
 	}
 
 	get portNumber() {
@@ -86,7 +84,7 @@ class IPCServer {
 	}
 
 	get wsInstance() {
-		return this.ws;
+		return this.websocket;
 	}
 }
 
