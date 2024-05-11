@@ -101,7 +101,6 @@ export const compileMods = async () => {
 				if (!dependency.version)
 					throw new Error("Dependency format incorrect: can't find version");
 
-
 				if (
 					fs.existsSync(
 						path.join(process.cwd(), 'mods', dependency.name, 'mod.json'),
@@ -115,7 +114,10 @@ export const compileMods = async () => {
 						throw new Error(
 							`${modJson.name} requires version ${dependency.version} of ${dependency.name} but version ${dependencyJson.version} is installed`,
 						);
-					if (dependencyJson.author.toLowerCase() !== dependency.author.toLowerCase())
+					if (
+						dependencyJson.author.toLowerCase() !==
+						dependency.author.toLowerCase()
+					)
 						throw new Error(
 							`${modJson.name} requires mod ${dependency.name} by ${dependency.author} but ${dependency.name} by ${dependencyJson.author} is installed`,
 						);
