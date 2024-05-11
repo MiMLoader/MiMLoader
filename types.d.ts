@@ -4,10 +4,10 @@ export interface Mod {
     author: string;
     version: string;
     homepage: string;
-    preload: string;
+    preload: string | false;
     main: string;
-    module: boolean;
     dependencies: string[];
     priority: number;
     path?: string;
+    tags: string[];
 }
