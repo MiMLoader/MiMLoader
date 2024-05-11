@@ -81,7 +81,7 @@ export const compileMods = async () => {
 	for (const mod of importList) {
 		const file = mod.file;
 		if (file.endsWith('.zip')) continue;
-		const modJson = fs.readJsonSync(
+		const modJson: Mod = fs.readJsonSync(
 			path.join(process.cwd(), 'mods', file, 'mod.json'),
 		);
 
@@ -90,11 +90,9 @@ export const compileMods = async () => {
 			for (const dep of dependencies) {
 				const dependency = {
 					author: dep.split('+')[0],
-					name: dep.slice(dep.indexOf('+'), dep.indexOf('@')),
+					name: dep.slice(dep.indexOf('+') + 1, dep.indexOf('@')),
 					version: dep.split('@')[1],
 				};
-
-				console.log(dependency);
 
 				if (!dependency.author)
 					throw new Error("Dependency format incorrect: can't find author");
@@ -102,6 +100,7 @@ export const compileMods = async () => {
 					throw new Error("Dependency format incorrect: can't find name");
 				if (!dependency.version)
 					throw new Error("Dependency format incorrect: can't find version");
+
 
 				if (
 					fs.existsSync(
@@ -114,15 +113,15 @@ export const compileMods = async () => {
 
 					if (dependencyJson.version !== dependency.version)
 						throw new Error(
-							`Dependency ${dependency.name} requires version ${dependency.version} but version ${dependencyJson.version} is installed`,
+							`${modJson.name} requires version ${dependency.version} of ${dependency.name} but version ${dependencyJson.version} is installed`,
 						);
-					if (dependencyJson.author !== dependency.author)
+					if (dependencyJson.author.toLowerCase() !== dependency.author.toLowerCase())
 						throw new Error(
-							`Dependency ${dependency.name}'s author should be ${dependency.author} but ${dependencyJson.author} is installed`,
+							`${modJson.name} requires mod ${dependency.name} by ${dependency.author} but ${dependency.name} by ${dependencyJson.author} is installed`,
 						);
 				} else
 					throw new Error(
-						`Couldn't find dependency ${dependency.name} for ${modJson.name}@${modJson.version} - ${modJson.author}`,
+						`Couldn't find dependency ${dependency.name} for ${modJson.author}+${modJson.name}@${modJson.version}`,
 					);
 			}
 		}
