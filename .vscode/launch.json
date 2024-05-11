@@ -10,9 +10,9 @@
 			"cwd": "${env:MI_FOLDER}",
 			"stopOnEntry": false,
 			"watchMode": false,
-			"args": [
-				"--repatch"
-			]
+			// "args": [
+			// 	"--repatch"
+			// ]
 		}
 	]
 }

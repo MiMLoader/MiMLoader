@@ -20,7 +20,8 @@
     "typescript": "^5.0.0"
   },
   "trustedDependencies": [
-    "@biomejs/biome"
+    "@biomejs/biome",
+    "esbuild"
   ],
   "dependencies": {
     "compressing": "^1.10.0",

@@ -51,7 +51,7 @@ export const compileMods = async () => {
 	const importList = [];
 	for (const file of mods) {
 		if (file.endsWith('.zip')) continue;
-		const modJson = fs.readJsonSync(
+		const modJson: Mod = fs.readJsonSync(
 			path.join(process.cwd(), 'mods', file, 'mod.json'),
 		);
 
@@ -85,12 +85,44 @@ export const compileMods = async () => {
 			path.join(process.cwd(), 'mods', file, 'mod.json'),
 		);
 
-		const dependencies = modJson.dependencies;
+		const dependencies: string[] = modJson.dependencies;
 		if (dependencies) {
 			for (const dep of dependencies) {
-				if (!fs.existsSync(path.join(process.cwd(), 'mods', dep, 'mod.json')))
+				const dependency = {
+					author: dep.split('+')[0],
+					name: dep.slice(dep.indexOf('+'), dep.indexOf('@')),
+					version: dep.split('@')[1],
+				};
+
+				console.log(dependency);
+
+				if (!dependency.author)
+					throw new Error("Dependency format incorrect: can't find author");
+				if (!dependency.name)
+					throw new Error("Dependency format incorrect: can't find name");
+				if (!dependency.version)
+					throw new Error("Dependency format incorrect: can't find version");
+
+				if (
+					fs.existsSync(
+						path.join(process.cwd(), 'mods', dependency.name, 'mod.json'),
+					)
+				) {
+					const dependencyJson: Mod = fs.readJsonSync(
+						path.join(process.cwd(), 'mods', dependency.name, 'mod.json'),
+					);
+
+					if (dependencyJson.version !== dependency.version)
+						throw new Error(
+							`Dependency ${dependency.name} requires version ${dependency.version} but version ${dependencyJson.version} is installed`,
+						);
+					if (dependencyJson.author !== dependency.author)
+						throw new Error(
+							`Dependency ${dependency.name}'s author should be ${dependency.author} but ${dependencyJson.author} is installed`,
+						);
+				} else
 					throw new Error(
-						`Couldn't find dependency ${dep} for ${modJson.name}@${modJson.version} - ${modJson.author}`,
+						`Couldn't find dependency ${dependency.name} for ${modJson.name}@${modJson.version} - ${modJson.author}`,
 					);
 			}
 		}
