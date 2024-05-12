@@ -9,7 +9,9 @@ import { ipc, preloadModsList, startUp } from './lib';
 	console.time('Started');
 
 	await startUp();
-	ipc.start();
+	ipc.start(() => {
+		console.timeLog('Started', 'IPC server');
+	});
 
 	let executable: string | undefined;
 	if (existsSync(path.join(process.cwd(), 'game', 'Moonstone Island.exe'))) {
