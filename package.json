@@ -6,7 +6,7 @@
     "lint": "bunx @biomejs/biome check src",
     "lint:fix": "bun lint --apply",
     "compileAll": "bun run compileLinux && bun run compileWindows && bun run compileDarwin",
-    "compileLinux": "bun build --compile --minify --sourcemap --target=bun-linux-x64 src/index.ts --outfile bin/linux/mimloader-linux",
+    "compileLinux": "bun build --compile --minify --sourcemap --target=bun-linux-x64 src/index.ts --outfile \"/home/saturn/Moonstone Island Mod Loader (non-steam)/mimloader-linux\"",
     "compileWindows": "bun build --compile --minify --sourcemap --target=bun-windows-x64 src/index.ts --outfile bin/win/Moonstone.Island.Mod.Loader.exe",
     "compileDarwin": "bun build --compile --minify --sourcemap --target=bun-darwin-x64 src/index.ts --outfile bin/macos/mimloader-macos",
     "build": "bun run lint && bun test && bun run compileAll"

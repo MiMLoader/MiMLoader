@@ -11,3 +11,9 @@ export interface Mod {
     path?: string;
     tags: string[];
 }
+
+export interface Ipc {
+    handler: string;
+    channel: string;
+    message: string;
+}

@@ -7,9 +7,10 @@
 			"request": "launch",
 			"name": "Debug File",
 			"program": "${workspaceFolder}/src/index.ts",
-			"cwd": "${env:MI_FOLDER}",
+			"cwd": "/home/saturn/Moonstone Island Mod Loader (non-steam)/",
 			"stopOnEntry": false,
 			"watchMode": false,
+			// "cwd": "${env:MI_FOLDER}",
 			// "args": [
 			// 	"--repatch"
 			// ]
