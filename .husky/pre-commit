@@ -1,0 +1,4 @@
+bash << EOF
+bun run lint:fix
+bun test
+EOF
