@@ -1,4 +1,3 @@
-console.clear();
 import { exec } from 'node:child_process';
 import path from 'node:path';
 import { existsSync } from 'fs-extra';

@@ -9,10 +9,10 @@ export const startUp = async () => {
 	if (fs.existsSync(path.join(process.cwd(), 'tmp-package')))
 		fs.removeSync(path.join(process.cwd(), 'tmp-package'));
 
-	// Check mods folder
-	await fs.ensureDir(path.join(process.cwd(), 'mods')).catch((err) => {
-		throw new Error(err);
-	});
+	// Change cwd?
+	if (args.includes('--cwd')) {
+		process.chdir(args[args.indexOf('--cwd') + 1]);
+	}
 
 	// First time?
 	if (
@@ -20,6 +20,11 @@ export const startUp = async () => {
 		args.includes('--repatch')
 	)
 		await firstTime();
+
+	// Check mods folder
+	await fs.ensureDir(path.join(process.cwd(), 'mods')).catch((err) => {
+		throw new Error(err);
+	});
 
 	// Load mods
 	await loadMods();

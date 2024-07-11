@@ -5,6 +5,7 @@
   "scripts": {
     "lint": "bunx @biomejs/biome check src",
     "lint:fix": "bun lint --apply",
+    "dev": "bun run src/index.ts -- --cwd \"$MI_FOLDER\"",
     "compileAll": "bun run compileLinux && bun run compileWindows && bun run compileDarwin",
     "compileLinux": "bun build --compile --minify --sourcemap --target=bun-linux-x64 src/index.ts --outfile bin/linux/mimloader-linux",
     "compileWindows": "bun build --compile --minify --sourcemap --target=bun-windows-x64 src/index.ts --outfile bin/win/Moonstone.Island.Mod.Loader.exe",
@@ -14,7 +15,6 @@
   "devDependencies": {
     "@biomejs/biome": "1.6.1",
     "@types/bun": "latest",
-    "@types/express": "^4.17.21",
     "@types/fs-extra": "^11.0.4"
   },
   "peerDependencies": {
