@@ -59,15 +59,22 @@ export const firstTime = async () => {
 			path.join(process.cwd(), 'game', 'package.nw', 'scripts', 'main.js'),
 		)
 		.then(async (data) => {
+			let patchedData = data
+				.toString()
+				.replace(/iRuntime=a;/, 'iRuntime=a;window.miml={runtime:a};');
+			patchedData = patchedData
+				.toString()
+				.replace(
+					/new self.RuntimeInterface\({useWorker:!0/,
+					'new self.RuntimeInterface({useWorker:!1',
+				);
 			await fs.writeFile(
 				path.join(process.cwd(), 'game', 'package.nw', 'scripts', 'main.js'),
-				data
-					.toString()
-					.replace(/iRuntime=a;/, 'iRuntime=a;window.miml={runtime: a};'),
+				patchedData,
 			);
 		});
 
-	// Inject mod scripts
+	// Inject mod script
 	console.timeLog('Started', 'Injecting mod script');
 	await fs
 		.readFile(path.join(process.cwd(), 'game', 'package.nw', 'index.html'))
