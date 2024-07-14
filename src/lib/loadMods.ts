@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { zip } from 'compressing';
+import { build } from 'bun';
 import * as fs from 'fs-extra';
 import { ipc } from '.';
 import type { Mod } from '../../types';
@@ -137,6 +138,18 @@ export const compileMods = async () => {
 			!fs.existsSync(path.join(process.cwd(), 'mods', modJson.name, 'mod.json'))
 		)
 			throw new Error(`Couldn't load ${file}'s mod.json`);
+
+
+		if (modJson.main.endsWith('.ts')) {
+			console.timeLog('Started', `Transpiling ${modJson.name}`);
+			await build({
+				entrypoints: [path.join(process.cwd(), 'mods', modJson.name, modJson.main)],
+				target: 'browser',
+				outdir: modJson.main.split('/').length === 1 ? path.join(process.cwd(), 'mods', modJson.name) : path.join(process.cwd(), 'mods', modJson.name, modJson.main, '../')
+			});
+			modJson.main = modJson.main.replace('.ts', '.js');
+			fs.writeJson(path.join(process.cwd(), 'mods', modJson.name, 'mod.json'), modJson);
+		}
 
 		const script = fs.readFileSync(
 			path.join(process.cwd(), 'mods', modJson.name, modJson.main), // hack to make pkg not transform the path
