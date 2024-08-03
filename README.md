@@ -10,17 +10,13 @@ Welcome to the Moonstone Island Mod Loader project! This project aims to enhance
 
 - **Mod Compatibility:** Our mod loader ensures compatibility with a wide range of mods created by the Moonstone Island community. Explore new gameplay elements, characters, quests, and much more.
 
-- **User-Friendly Interface:** The loader comes with a user-friendly interface, making it easy to enable, disable, and manage installed mods. Customize your gaming experience with just a few clicks.
-
 ## Installation
 
 Either follow this guide or install on steam.
 
-1. **Download:** Obtain the latest version of the mod loader from the github.
+1. **Download:** Obtain the latest version of the mod loader from the github and place the executable in a new folder in the same parent as the original game.
 
-3. **Run Installer:** Execute the installer program and Install it to be in the same folder as the original game folder.
-
-4. **Launch Moonstone Island Mod Lodaer:** Start the game with the created launch option.
+4. **Launch Moonstone Island Mod Loader:** Start the game with the executable.
 
 5. **Enjoy Modding:** Visit the modding community to discover and download exciting mods. Install them using the mod loader's interface and enhance your Moonstone Island experience.
 
