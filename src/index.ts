@@ -3,6 +3,10 @@ import path from 'node:path';
 import { existsSync } from 'fs-extra';
 import { ipc, preloadModsList, startUp } from './lib';
 
+process.addListener('uncaughtException', (error) => {
+	Bun.write(path.join(process.cwd(), 'latest.log'), JSON.stringify(error));
+});
+
 (async () => {
 	console.log('Starting MiMLoader');
 	console.time('Started');
