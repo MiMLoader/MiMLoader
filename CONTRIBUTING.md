@@ -7,7 +7,7 @@ Thank you for considering contributing to the Moonstone Island Mod Loader projec
 1. **Code Contributions:**
    - Fork the repository and create a new branch for your feature or bug fix.
    - Ensure your code follows the project's coding standards.
-   - Submit a pull request to the `develop` branch.
+   - Submit a pull request to the `main` branch.
 
 2. **Bug Reports:**
    - If you encounter a bug, please submit a detailed bug report on the [GitHub Issues](https://github.com/ahhhsaturn/mimloader/issues) page.
@@ -38,7 +38,7 @@ Thank you for considering contributing to the Moonstone Island Mod Loader projec
    - Clone your forked repository to your local machine.
 
    ```bash
-   git clone https://github.com/your-username/mod-loader.git
+   git clone https://github.com/your-username/mimloader.git
    ```
 
 3. **Create a Branch:**
