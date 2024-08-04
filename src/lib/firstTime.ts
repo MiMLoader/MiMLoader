@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { zip } from 'compressing';
 import * as fs from 'fs-extra';
+import os from 'node:os';
 
 export const firstTime = async () => {
 	// Do original game files exist?
@@ -13,11 +14,31 @@ export const firstTime = async () => {
 
 	// Copy original game files
 	console.timeLog('Started', 'Copying original game files');
+	// Create a empty folder to temp direcotry
+	const tmpDir = path.join(os.tmpdir(), 'miml');
+	await fs.ensureDir(tmpDir).catch((err) => {
+		throw new Error(err);
+	});
+	
+	// Copy and filter out the loader executable file to the system temp folder
+	const loaderExcutable = path.basename(process.argv[1]);
 	await fs.copy(
-		path.join(process.cwd(), '../Moonstone Island'),
-		path.join(process.cwd(), 'game'),
+		process.cwd(),
+		tmpDir,
+		{ 
+			filter: path => {
+			return !(path.indexOf(loaderExcutable) > -1);
+			} 
+		}
 	);
-
+	
+	// Move and rename the folder from the temp into game folder
+	const gameDir = path.join(process.cwd(), 'game')
+	await fs.move(
+		tmpDir,
+		gameDir,
+	);
+	
 	// Unpack game files
 	console.timeLog('Started', 'Unpacking game files');
 	await fs
