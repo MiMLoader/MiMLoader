@@ -14,20 +14,20 @@ export const firstTime = async () => {
 
 	// Copy original game files
 	console.timeLog('Started', 'Copying original game files');
-	// Create a empty folder to temp direcotry
+	// Create a empty folder to temp directory
 	const tmpDir = path.join(os.tmpdir(), 'miml');
 	await fs.ensureDir(tmpDir).catch((err) => {
 		throw new Error(err);
 	});
 	
 	// Copy and filter out the loader executable file to the system temp folder
-	const loaderExcutable = path.basename(process.argv[1]);
+	const loaderExecutable = path.basename(process.argv[1]);
 	await fs.copy(
 		process.cwd(),
 		tmpDir,
 		{ 
 			filter: path => {
-			return !(path.indexOf(loaderExcutable) > -1);
+			return !(path.indexOf(loaderExecutable) > -1);
 			} 
 		}
 	);
