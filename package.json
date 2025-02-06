@@ -24,7 +24,6 @@
     "@biomejs/biome"
   ],
   "dependencies": {
-    "@elysiajs/static": "^1.0.3",
     "compressing": "^1.10.0",
     "elysia": "^1.0.18",
     "fs-extra": "^11.2.0"

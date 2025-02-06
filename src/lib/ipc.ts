@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { staticPlugin } from '@elysiajs/static';
 import { Elysia } from 'elysia';
 import * as fs from 'fs-extra';
 
@@ -18,29 +17,18 @@ class IPCServer {
 		});
 	}
 
-	start(callback: () => void = () => {}) {
+	start(callback: () => void = () => { }) {
 		this.server.listen(this.port, callback);
 	}
 
-	hostAssets(name: string, location: string | null = null, mod = true) {
-		if (mod) {
-			this.server.use(
-				staticPlugin({
-					prefix: `/mods/${name}/assets`,
-					assets: path.join(process.cwd(), 'mods', name, 'assets'),
-				}),
-			);
-		} else {
-			if (location === null) {
-				throw new Error('Location is required for non-mod assets');
-			}
-			this.server.use(
-				staticPlugin({
-					prefix: `/${name}`,
-					assets: path.join(process.cwd(), location),
-				}),
-			);
-		}
+	hostAssets(name: string) {
+		this.server.get(`mods/${name}/assets/:file`, async ({ params: { file }, set }) => {
+			if (await Bun.file(path.join(process.cwd(), 'mods', name, 'assets', file)).exists())
+				return Bun.file(path.join(process.cwd(), 'mods', name, 'assets', file));
+			set.status = 404;
+			return 'Not Found';
+		});
+
 	}
 
 	get portNumber() {
