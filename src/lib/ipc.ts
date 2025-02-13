@@ -17,18 +17,26 @@ class IPCServer {
 		});
 	}
 
-	start(callback: () => void = () => { }) {
+	start(callback: () => void = () => {}) {
 		this.server.listen(this.port, callback);
 	}
 
 	hostAssets(name: string) {
-		this.server.get(`mods/${name}/assets/:file`, async ({ params: { file }, set }) => {
-			if (await Bun.file(path.join(process.cwd(), 'mods', name, 'assets', file)).exists())
-				return Bun.file(path.join(process.cwd(), 'mods', name, 'assets', file));
-			set.status = 404;
-			return 'Not Found';
-		});
-
+		this.server.get(
+			`mods/${name}/assets/:file`,
+			async ({ params: { file }, set }) => {
+				if (
+					await Bun.file(
+						path.join(process.cwd(), 'mods', name, 'assets', file),
+					).exists()
+				)
+					return Bun.file(
+						path.join(process.cwd(), 'mods', name, 'assets', file),
+					);
+				set.status = 404;
+				return 'Not Found';
+			},
+		);
 	}
 
 	get portNumber() {

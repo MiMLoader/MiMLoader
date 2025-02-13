@@ -6,11 +6,12 @@
     "lint": "bunx @biomejs/biome check src",
     "lint:fix": "bun lint --apply",
     "dev": "bun run src/index.ts -- --cwd \"$MI_FOLDER\"",
-    "compileAll": "bun run compileLinux && bun run compileWindows && bun run compileDarwin",
+    "compileAll": "bun run compileLinux && bun run compileWindows && bun run compileWindowsArm && bun run compileDarwin",
     "compileLinux": "bun build --compile --minify --sourcemap --target=bun-linux-x64 src/index.ts --outfile bin/linux/mimloader-linux",
-    "compileWindows": "bun build --compile --minify --sourcemap --target=bun-windows-x64 src/index.ts --outfile bin/win/Moonstone.Island.Mod.Loader.exe",
+    "compileWindows": "bun build --compile --minify --sourcemap --target=bun-windows-x64 src/index.ts --outfile bin/win/mimloader-windows.exe",
+    "compileWindowsArm": "bun build --compile --minify --sourcemap --target=bun-windows-x64-baseline src/index.ts --outfile bin/win/mimloader-windows-arm.exe",
     "compileDarwin": "bun build --compile --minify --sourcemap --target=bun-darwin-x64 src/index.ts --outfile bin/macos/mimloader-macos",
-    "build": "bun run lint && bun test && bun run compileAll"
+    "build": "bun run lint:fix && bun test && bun run compileAll"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.1",
