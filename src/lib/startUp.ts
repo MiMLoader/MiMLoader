@@ -1,7 +1,9 @@
 import path from 'node:path';
 import * as fs from 'fs-extra';
+
 import { firstTime } from '.';
 import { loadMods } from './loadMods';
+import { installMods } from './steam';
 
 const args = process.argv.slice(2);
 

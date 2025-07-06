@@ -1,5 +1,8 @@
 # Moonstone Island Mod Loader
 
+## This branch is build for steam support. for non steam use, use the main branch
+whats different? this version moves mods from the workshop folder into the mods folder and disabled dependency checking as steam will do that for us. developing mods just add `-dev` to the end of your folder so it doesnt get removed on start up.
+
 ## Overview
 
 Welcome to the Moonstone Island Mod Loader project! This project aims to enhance the modding experience for the game "Moonstone Island" by introducing a user-friendly mod loader. With this mod loader, players can easily customize and extend their gaming experience by installing and managing various mods created by the community.

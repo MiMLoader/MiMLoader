@@ -4,6 +4,7 @@ import { zip } from 'compressing';
 import * as fs from 'fs-extra';
 import { ipc } from '.';
 import type { Mod } from '../../types';
+import { installMods } from './steam';
 
 export const unpackMods = async () => {
 	const packedMods = fs
@@ -86,49 +87,6 @@ export const compileMods = async () => {
 			path.join(process.cwd(), 'mods', file, 'mod.json'),
 		);
 
-		const dependencies: string[] = modJson.dependencies;
-		if (dependencies) {
-			for (const dep of dependencies) {
-				const dependency = {
-					author: dep.split('+')[0],
-					name: dep.slice(dep.indexOf('+') + 1, dep.indexOf('@')),
-					version: dep.split('@')[1],
-				};
-
-				if (!dependency.author)
-					throw new Error("Dependency format incorrect: can't find author");
-				if (!dependency.name)
-					throw new Error("Dependency format incorrect: can't find name");
-				if (!dependency.version)
-					throw new Error("Dependency format incorrect: can't find version");
-
-				if (
-					fs.existsSync(
-						path.join(process.cwd(), 'mods', dependency.name, 'mod.json'),
-					)
-				) {
-					const dependencyJson: Mod = fs.readJsonSync(
-						path.join(process.cwd(), 'mods', dependency.name, 'mod.json'),
-					);
-
-					if (dependencyJson.version !== dependency.version)
-						throw new Error(
-							`${modJson.name} requires version ${dependency.version} of ${dependency.name} but version ${dependencyJson.version} is installed`,
-						);
-					if (
-						dependencyJson.author.toLowerCase() !==
-						dependency.author.toLowerCase()
-					)
-						throw new Error(
-							`${modJson.name} requires mod ${dependency.name} by ${dependency.author} but ${dependency.name} by ${dependencyJson.author} is installed`,
-						);
-				} else
-					throw new Error(
-						`Couldn't find dependency ${dependency.name} for ${modJson.author}+${modJson.name}@${modJson.version}`,
-					);
-			}
-		}
-
 		console.timeLog(
 			'Started',
 			`Compiling ${modJson.name}@${modJson.version} - ${modJson.author}`,
@@ -183,6 +141,8 @@ export const loadMods = async () => {
 	console.timeLog('Started', 'Loading mods');
 
 	fs.removeSync(path.join(process.cwd(), 'mods', 'compiled-mods.js'));
+
+	installMods();
 
 	await unpackMods();
 	await compileMods();
