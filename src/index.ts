@@ -1,58 +1,88 @@
-import { exec } from 'node:child_process';
-import path from 'node:path';
-import { existsSync } from 'fs-extra';
-import { ipc, preloadModsList, startUp } from './lib';
+import { exists, mkdir } from "node:fs/promises";
+import { platform } from "node:os";
+import { parseArgs } from "node:util";
+import { spawn, write } from "bun";
+import { copyGameFiles } from "$lib/copyGameFiles";
+import {
+  enableDevtools,
+  enableProxy,
+  installWaldoPackage,
+  legacyRuntimeMods,
+} from "$lib/patches";
+import { server } from "$lib/server";
+import {
+  patchWaldo,
+  proxyListFetch,
+  proxyListXHR,
+  recordInstall,
+  unpack,
+} from "$lib/mods";
 
-process.addListener('uncaughtException', (error) => {
-	Bun.write(path.join(process.cwd(), 'latest.log'), JSON.stringify(error));
+console.log("Starting MiMLoader");
+console.time("Started");
+
+const { values: args } = parseArgs({
+  args: Bun.argv,
+  options: {
+    cwd: {
+      type: "string",
+    },
+    repatch: {
+      type: "boolean",
+    },
+    dev: {
+      type: "boolean",
+    },
+  },
+  strict: true,
+  allowPositionals: true,
 });
 
-console.log('Starting MiMLoader');
-console.time('Started');
+if (args.cwd) process.chdir(args.cwd);
+if (!(await exists("game")) || args.repatch) {
+  await copyGameFiles();
+  await legacyRuntimeMods();
+  await enableProxy();
+}
+if (args.dev) await enableDevtools();
+if (!(await exists("mods"))) mkdir("mods");
+if (!(await exists("mods.json"))) write("mods.json", JSON.stringify([]));
+if (!(await exists("patched"))) mkdir("patched");
+await unpack();
 
-await startUp();
-ipc.start(() => {
-	console.timeLog('Started', 'IPC server');
+await installWaldoPackage();
+await patchWaldo();
+
+const executable: Promise<string> = new Promise((resolve) => {
+  switch (platform()) {
+    case "win32":
+      resolve("game/Moonstone Island.exe");
+      break;
+    case "linux":
+      resolve("game/Moonstone Island");
+      break;
+    case "darwin":
+      resolve("game/Moonstone Island.app/Contents/MacOS/nwjs");
+      break;
+    default:
+      throw new Error("Can't detect correct game executable");
+  }
 });
 
-let executable: string | undefined;
-if (existsSync(path.join(process.cwd(), 'game', 'Moonstone Island.exe'))) {
-	executable = path.join(process.cwd(), 'game', 'Moonstone Island.exe');
-} else if (existsSync(path.join(process.cwd(), 'game', 'Moonstone Island'))) {
-	executable = path.join(process.cwd(), 'game', 'Moonstone Island');
-} else if (
-	existsSync(path.join(process.cwd(), 'game', 'Moonstone Island.app'))
-) {
-	executable = path.join(
-		process.cwd(),
-		'game',
-		'Moonstone Island.app',
-		'Contents',
-		'MacOS',
-		'nwjs',
-	);
-}
+server.listen(5131);
 
-if (executable) {
-	exec(`"${executable}"`, async (error, stdout, stderr) => {
-		if (error) throw error;
-		console.log(stdout);
-		console.error(stderr);
-	})
-		.on('exit', (code: number) => {
-			console.log(`Moonstone Island exited with code ${code}`);
-			process.exit(0);
-		})
-		.on('spawn', () => {
-			console.timeLog('Started', 'Moonstone Island');
+const proxyListFetchArray = JSON.stringify(Array.from(proxyListFetch));
+const proxyListXHRArray = JSON.stringify(Array.from(proxyListXHR));
 
-			for (const mod of preloadModsList) {
-				console.timeLog('Started', `Preloading mod: ${mod.name}`);
-				require(`${mod.path}`);
-			}
+console.log(proxyListXHRArray);
 
-			console.timeEnd('Started');
-		});
-} else {
-	throw new Error('Could not find Moonstone Island executable');
-}
+spawn([await executable], {
+  env: {
+    ...process.env,
+    proxyListFetch: proxyListFetchArray,
+    proxyListXHR: proxyListXHRArray,
+  },
+  onExit: () => process.exit(0),
+});
+
+console.timeEnd("Started");
