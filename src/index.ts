@@ -1,4 +1,4 @@
-import { exists, mkdir } from "node:fs/promises";
+import { exists, mkdir, rm, rmdir } from "node:fs/promises";
 import { platform } from "node:os";
 import { parseArgs } from "node:util";
 import { spawn, write } from "bun";
@@ -47,7 +47,11 @@ if (!(await exists("game")) || args.repatch) {
 if (args.dev) await enableDevtools();
 if (!(await exists("mods"))) mkdir("mods");
 if (!(await exists("mods.json"))) write("mods.json", JSON.stringify([]));
-if (!(await exists("patched"))) mkdir("patched");
+
+// for now we'll just delete and repatch waldo everytime so we can see bugs easier
+await rm("patched", { recursive: true, force: true });
+await mkdir("patched");
+
 await unpack();
 
 await installWaldoPackage();
